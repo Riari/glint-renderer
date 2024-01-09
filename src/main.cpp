@@ -1,15 +1,13 @@
-#include <iostream>
+#include <vector>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <spdlog/spdlog.h>
 
-#include "GL/Buffer/EBO.h"
-#include "GL/Buffer/VAO.h"
-#include "GL/Buffer/VBO.h"
+#include "App/Window.h"
+#include "GL/Mesh.h"
 #include "GL/ShaderProgram.h"
 #include "GL/Texture.h"
 #include "Util/File.h"
@@ -19,28 +17,25 @@
 bool init();
 bool loop();
 
-const GLuint WINDOW_WIDTH{1920}, WINDOW_HEIGHT{1080};
-GLFWwindow *pWindow;
+App::Window* gWindow;
 
-const GLfloat PYRAMIC_VERTICES[] = {
+const std::vector<GLfloat> PYRAMID_VERTICES = {
     -1.0f, -1.0f, 0.0f,
     0.0f, -1.0f, 1.0f,
     1.0f, -1.0f, 0.0f,
     0.0f, 1.0f, 0.0f
 };
 
-const unsigned int PYRAMIC_INDICES[] = {
+const std::vector<GLuint> PYRAMID_INDICES = {
     0, 3, 1,
     1, 3, 2,
     2, 3, 0,
     0, 1, 2,
 };
 
-GL::ShaderProgram *pTriShader;
+std::vector<GL::Mesh*> gTestMeshes;
+GL::ShaderProgram *gTestShader;
 
-float triOffset = 0.0f;
-float triMaxOffset = 0.5f;
-float triIncrement = 0.005f;
 float triRotation = 0.0f;
 
 int gFramesPerSecond;
@@ -71,7 +66,6 @@ int main()
         }
     }
 
-    glfwDestroyWindow(pWindow);
     glfwTerminate();
 
     return 0;
@@ -79,12 +73,12 @@ int main()
 
 static void error_callback(int error, const char* description)
 {
-    fprintf(stderr, "Error %d: %s\n", error, description);
+    SPDLOG_ERROR("Error {}: {}", error, description);
 }
 
 bool init()
 {
-    SPDLOG_INFO("Initialising GLFW context with OpenGL 4.1");
+    SPDLOG_INFO("Initialising GLFW + GLEW with OpenGL 4.1");
 
     glfwSetErrorCallback(error_callback);
     if (!glfwInit())
@@ -92,45 +86,33 @@ bool init()
         return false;
     }
 
-    glfwWindowHint(GLFW_SAMPLES, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    pWindow = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "udemy-opengl", NULL, NULL);
-    glfwMakeContextCurrent(pWindow);
+    gWindow = new App::Window(1920, 1080, "udemy-opengl");
+    gWindow->MakeCurrent();
 
     if (glewInit() != GLEW_OK)
     {
         return false;
     }
 
-    GL::VAO vao;
-    GL::VBO vbo;
-    GL::EBO ebo;
+    gTestMeshes.push_back(new GL::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES));
+    gTestMeshes.push_back(new GL::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES));
 
-    vao.Bind();
-
-    vbo.Bind();
-    vbo.Write(sizeof(PYRAMIC_VERTICES), PYRAMIC_VERTICES, GL_STATIC_DRAW);
-
-    vao.SetAttributePointer(0, 3, 3 * sizeof(float), (void*)0);
-    vao.EnableAttributePointer(0);
-
-    ebo.Bind();
-    ebo.Write(sizeof(PYRAMIC_INDICES), PYRAMIC_INDICES, GL_STATIC_DRAW);
+    gTestMeshes[0]->SetPosition(glm::vec3(-1.0f, 0.0f, -2.5f));
+    gTestMeshes[0]->SetScale(glm::vec3(0.5f));
+    gTestMeshes[1]->SetPosition(glm::vec3(1.0f, 0.0f, -2.5f));
+    gTestMeshes[1]->SetScale(glm::vec3(0.65f));
 
     std::string vertSource = Util::File::Read("shaders/tri.vert.glsl");
     std::string fragSource = Util::File::Read("shaders/tri.frag.glsl");
-    pTriShader = new GL::ShaderProgram(vertSource.c_str(), fragSource.c_str());
-    if (pTriShader->Build() != 0)
+    gTestShader = new GL::ShaderProgram(vertSource.c_str(), fragSource.c_str());
+    if (gTestShader->Build() != 0)
     {
         SPDLOG_ERROR("Shader program failed to build");
         glfwTerminate();
         return false;
     }
 
-    pTriShader->Use();
+    gTestShader->Use();
 
     glEnable(GL_DEPTH_TEST);
 
@@ -139,7 +121,7 @@ bool init()
 
 bool loop()
 {
-    if (glfwWindowShouldClose(pWindow))
+    if (gWindow->ShouldClose())
     {
         return false;
     }
@@ -147,35 +129,32 @@ bool loop()
     // Update
     glfwPollEvents();
 
-    if (triOffset > triMaxOffset || triOffset < -triMaxOffset)
-    {
-        triIncrement = -triIncrement;
-    }
-
-    triOffset += triIncrement;
-
-    triRotation += 0.1f;
+    triRotation += 0.01f;
     if (triRotation > 360.0f)
     {
-        triRotation = 360.0f;
+        triRotation = -360.0f;
     }
 
-    glm::mat4 model(1.0f);
-    // model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f));
-    model = glm::rotate(model, triRotation * Util::Math::DEG_TO_RAD, glm::vec3(0.0f, 1.0f, 0.0f));
-    model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+    glm::mat4 view(1.0f);
+
+    glm::mat4 projection = glm::perspective(45.0f, (float)gWindow->GetWidth() / (float)gWindow->GetHeight(), 0.1f, 100.0f);
 
     // Draw
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    pTriShader->Use();
-    pTriShader->SetUniformMatrix4fv("model", glm::value_ptr(model));
+    gTestShader->Use();
+    gTestShader->SetUniformMatrix4fv("view", glm::value_ptr(view));
+    gTestShader->SetUniformMatrix4fv("projection", glm::value_ptr(projection));
 
-    // glDrawArrays(GL_TRIANGLES, 0, 3); // for drawing without the EBO (indexed drawing)
-    glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+    for (auto pTestMesh : gTestMeshes)
+    {
+        pTestMesh->SetRotation(glm::vec3(0.0f, triRotation, 0.0f));
+        gTestShader->SetUniformMatrix4fv("model", glm::value_ptr(pTestMesh->GetModelMatrix()));
+        pTestMesh->Draw();
+    }
 
-    glfwSwapBuffers(pWindow);
+    gWindow->SwapBuffers();
 
     return true;
 }

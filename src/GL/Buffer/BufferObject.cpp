@@ -11,6 +11,11 @@ BufferObject::BufferObject(GLenum target)
     glGenBuffers(1, &mId);
 }
 
+BufferObject::~BufferObject()
+{
+    glDeleteBuffers(1, &mId);
+}
+
 void BufferObject::Bind()
 {
     assert(("BufferObject must not be bound already", !mIsBound));

@@ -10,6 +10,7 @@ namespace GL
     {
     public:
         BufferObject(GLenum target);
+        ~BufferObject();
 
         void Bind();
         void Unbind();

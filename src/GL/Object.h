@@ -11,6 +11,7 @@ namespace GL
         Object(GLuint id);
 
         GLuint GetID() { return mId; }
+        bool IsBound() { return mIsBound; }
 
     protected:
         GLuint mId;

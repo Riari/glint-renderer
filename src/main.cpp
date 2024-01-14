@@ -19,6 +19,8 @@ bool loop();
 
 App::Window* gWindow;
 
+GL::ShaderProgram *gTestShader;
+
 const std::vector<GLfloat> PYRAMID_VERTICES = {
     -1.0f, -1.0f, 0.0f,
     0.0f, -1.0f, 1.0f,
@@ -34,7 +36,6 @@ const std::vector<GLuint> PYRAMID_INDICES = {
 };
 
 std::vector<GL::Mesh*> gTestMeshes;
-GL::ShaderProgram *gTestShader;
 
 float triRotation = 0.0f;
 
@@ -66,6 +67,14 @@ int main()
         }
     }
 
+    delete gWindow;
+    delete gTestShader;
+    for (auto mesh : gTestMeshes)
+    {
+        delete mesh;
+    }
+    gTestMeshes.clear();
+
     glfwTerminate();
 
     return 0;
@@ -80,41 +89,55 @@ bool init()
 {
     SPDLOG_INFO("Initialising GLFW + GLEW with OpenGL 4.1");
 
+    // GLFW initialisation
     glfwSetErrorCallback(error_callback);
     if (!glfwInit())
     {
         return false;
     }
 
-    gWindow = new App::Window(1920, 1080, "udemy-opengl");
-    gWindow->MakeCurrent();
+    // Window creation
+    {
+        gWindow = new App::Window(1920, 1080, "udemy-opengl");
+        gWindow->MakeCurrent();
+    }
 
+    // GLEW initialisation
     if (glewInit() != GLEW_OK)
     {
         return false;
     }
 
-    gTestMeshes.push_back(new GL::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES));
-    gTestMeshes.push_back(new GL::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES));
-
-    gTestMeshes[0]->SetPosition(glm::vec3(-1.0f, 0.0f, -2.5f));
-    gTestMeshes[0]->SetScale(glm::vec3(0.5f));
-    gTestMeshes[1]->SetPosition(glm::vec3(1.0f, 0.0f, -2.5f));
-    gTestMeshes[1]->SetScale(glm::vec3(0.65f));
-
-    std::string vertSource = Util::File::Read("shaders/tri.vert.glsl");
-    std::string fragSource = Util::File::Read("shaders/tri.frag.glsl");
-    gTestShader = new GL::ShaderProgram(vertSource.c_str(), fragSource.c_str());
-    if (gTestShader->Build() != 0)
+    // Shader initialisation
     {
-        SPDLOG_ERROR("Shader program failed to build");
-        glfwTerminate();
-        return false;
+        std::string vertSource = Util::File::Read("shaders/tri.vert.glsl");
+        std::string fragSource = Util::File::Read("shaders/tri.frag.glsl");
+        gTestShader = new GL::ShaderProgram(vertSource.c_str(), fragSource.c_str());
+        if (gTestShader->Build() != 0)
+        {
+            SPDLOG_ERROR("Shader program failed to build");
+            glfwTerminate();
+            return false;
+        }
+
+        gTestShader->Use();
     }
 
-    gTestShader->Use();
+    // Mesh initialisation
+    {
+        gTestMeshes.push_back(new GL::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES));
+        gTestMeshes.push_back(new GL::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES));
 
-    glEnable(GL_DEPTH_TEST);
+        gTestMeshes[0]->SetPosition(glm::vec3(-1.0f, 0.0f, -2.5f));
+        gTestMeshes[0]->SetScale(glm::vec3(0.5f));
+        gTestMeshes[1]->SetPosition(glm::vec3(1.0f, 0.0f, -2.5f));
+        gTestMeshes[1]->SetScale(glm::vec3(0.65f));
+    }
+
+    // OpenGL flags
+    {
+        glEnable(GL_DEPTH_TEST);
+    }
 
     return true;
 }
@@ -155,6 +178,7 @@ bool loop()
     }
 
     gWindow->SwapBuffers();
+    gWindow->ClearMousePosChanges();
 
     return true;
 }

@@ -6,9 +6,13 @@
 
 namespace App
 {
+    const size_t MAX_KEYS = 1024;
+
     class Window
     {
     public:
+        bool mMouseFirstMoved{false};
+
         Window(int width, int height, const char* title);
         ~Window();
 
@@ -18,11 +22,27 @@ namespace App
         void MakeCurrent() const;
         bool ShouldClose() const;
         void SwapBuffers() const;
+        void ClearMousePosChanges();
+
+        bool IsKeyPressed(int key) const;
+        float GetMouseChangeX() const;
+        float GetMouseChangeY() const;
 
     private:
         GLFWwindow* mHandle;
 
         int mWidth, mHeight;
         const char* mTitle;
+
+        bool mKeysPressed[MAX_KEYS];
+
+        float mMouseLastX{0.f}, mMouseLastY{0.f}, mMouseChangeX{0.f}, mMouseChangeY{0.f};
+
+        void InitCallbacks() const;
+
+        static Window* GetCallbackHandle(GLFWwindow* handle);
+
+        static void KeyCallback(GLFWwindow* handle, int key, int scancode, int action, int mods);
+        static void MousePositionCallback(GLFWwindow* handle, double x, double y);
     };
 };

@@ -22,11 +22,11 @@ namespace App
         void MakeCurrent() const;
         bool ShouldClose() const;
         void SwapBuffers() const;
-        void ClearMousePosChanges();
+        void ClearMousePosDeltas();
 
         bool IsKeyPressed(int key) const;
-        float GetMouseChangeX() const;
-        float GetMouseChangeY() const;
+        float GetMouseDeltaX() const;
+        float GetMouseDeltaY() const;
 
     private:
         GLFWwindow* mHandle;
@@ -36,7 +36,7 @@ namespace App
 
         bool mKeysPressed[MAX_KEYS];
 
-        float mMouseLastX{0.f}, mMouseLastY{0.f}, mMouseChangeX{0.f}, mMouseChangeY{0.f};
+        float mMouseLastX{0.f}, mMouseLastY{0.f}, mMouseDeltaX{0.f}, mMouseDeltaY{0.f};
 
         void InitCallbacks() const;
 

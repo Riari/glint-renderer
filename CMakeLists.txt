@@ -42,6 +42,7 @@ if(NOT glfw_POPULATED)
 endif()
 
 set(SOURCES
+    src/App/Camera.cpp
     src/App/Window.cpp
     src/GL/Buffer/BufferObject.cpp
     src/GL/Buffer/EBO.cpp
@@ -58,6 +59,7 @@ set(SOURCES
 )
 
 set(HEADERS
+    src/App/Camera.h
     src/App/Window.h
     src/GL/Buffer/BufferObject.h
     src/GL/Buffer/EBO.h

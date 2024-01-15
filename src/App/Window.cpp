@@ -18,6 +18,11 @@ namespace App
 
         InitCallbacks();
         glfwSetInputMode(mHandle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+        if (glfwRawMouseMotionSupported())
+        {
+            glfwSetInputMode(mHandle, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+        }
     }
 
     Window::~Window()
@@ -50,10 +55,15 @@ namespace App
         glfwSwapBuffers(mHandle);
     }
 
-    void Window::ClearMousePosChanges()
+    void Window::ClearMousePosDeltas()
     {
-        mMouseChangeX = 0.0f;
-        mMouseChangeY = 0.0f;
+        if (mMouseDeltaX == 0.0f && mMouseDeltaY == 0.0f)
+        {
+            return;
+        }
+
+        mMouseDeltaX = 0.0f;
+        mMouseDeltaY = 0.0f;
     }
 
     bool Window::IsKeyPressed(int key) const
@@ -61,14 +71,14 @@ namespace App
         return mKeysPressed[key];
     }
 
-    float Window::GetMouseChangeX() const
+    float Window::GetMouseDeltaX() const
     {
-        return mMouseChangeX;
+        return mMouseDeltaX;
     }
 
-    float Window::GetMouseChangeY() const
+    float Window::GetMouseDeltaY() const
     {
-        return mMouseChangeY;
+        return mMouseDeltaY;
     }
 
     void Window::InitCallbacks() const
@@ -106,8 +116,8 @@ namespace App
             window->mMouseFirstMoved = false;
         }
 
-        window->mMouseChangeX = x - window->mMouseLastX;
-        window->mMouseChangeY = window->mMouseLastY - y;
+        window->mMouseDeltaX = x - window->mMouseLastX;
+        window->mMouseDeltaY = window->mMouseLastY - y;
         window->mMouseLastX = x;
         window->mMouseLastY = y;
     }

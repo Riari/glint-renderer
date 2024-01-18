@@ -1,16 +1,23 @@
 #include "Window.h"
 
+#include <spdlog/spdlog.h>
+
 namespace App
 {
+    const int GL_VERSION_MAJOR = 4;
+    const int GL_VERSION_MINOR = 5;
+
     Window::Window(int width, int height, const char* title)
         : mWidth(width)
         , mHeight(height)
         , mTitle(title)
     {
         glfwWindowHint(GLFW_SAMPLES, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GL_VERSION_MAJOR);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GL_VERSION_MINOR);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+        SPDLOG_INFO("Creating window {} x {} with OpenGL {}.{} context", width, height, GL_VERSION_MAJOR, GL_VERSION_MINOR);
 
         mHandle = glfwCreateWindow(width, height, title, NULL, NULL);
 

@@ -9,11 +9,13 @@ namespace GL
     class Texture : public Object
     {
     public:
-        Texture();
+        Texture(const char* path);
         ~Texture();
 
-        void Generate(int width, int height, unsigned char* data);
         void Bind();
         void Unbind();
+
+    private:
+        void Generate(int width, int height, unsigned char* data);
     };
 };

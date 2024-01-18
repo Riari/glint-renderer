@@ -6,7 +6,7 @@
 
 namespace GL
 {
-    Mesh::Mesh(std::vector<GLfloat> vertices, std::vector<GLuint> indices)
+    Mesh::Mesh(std::vector<GLfloat> vertices, std::vector<GLuint> indices, unsigned int vertexLength, std::vector<unsigned int> attributeSizes)
         : mVertices(vertices)
         , mIndices(indices)
     {
@@ -15,8 +15,13 @@ namespace GL
         mVBO.Bind();
         mVBO.Write(sizeof(vertices[0]) * vertices.size(), &mVertices[0], GL_STATIC_DRAW);
 
-        mVAO.SetAttributePointer(0, 3, 3 * sizeof(float), (void*)0);
-        mVAO.EnableAttributePointer(0);
+        unsigned int prevAttributeSize = 0;
+        for (unsigned int i = 0; i < attributeSizes.size(); ++i)
+        {
+            mVAO.SetAttributePointer(i, attributeSizes[i], sizeof(vertices[0]) * vertexLength, (void*)(sizeof(vertices[0]) * prevAttributeSize));
+            mVAO.EnableAttributePointer(i);
+            prevAttributeSize = attributeSizes[i];
+        }
 
         mEBO.Bind();
         mEBO.Write(sizeof(indices[0]) * indices.size(), &mIndices[0], GL_STATIC_DRAW);

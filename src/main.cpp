@@ -6,6 +6,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <spdlog/spdlog.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #include "App/Camera.h"
 #include "App/Window.h"
 #include "GL/Mesh.h"
@@ -23,10 +26,10 @@ App::Camera* gCamera;
 GL::ShaderProgram *gTestShader;
 
 const std::vector<GLfloat> PYRAMID_VERTICES = {
-    -1.0f, -1.0f, 0.0f,
-    0.0f, -1.0f, 1.0f,
-    1.0f, -1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f
+    -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, -1.0f, 1.0f, 0.5f, 0.0f,
+    1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f, 0.5f, 1.0f,
 };
 
 const std::vector<GLuint> PYRAMID_INDICES = {
@@ -37,6 +40,7 @@ const std::vector<GLuint> PYRAMID_INDICES = {
 };
 
 std::vector<GL::Mesh*> gTestMeshes;
+std::vector<GL::Texture*> gTestTextures;
 
 float triRotation = 0.0f;
 
@@ -94,7 +98,7 @@ static void error_callback(int error, const char* description)
 
 bool init()
 {
-    SPDLOG_INFO("Initialising GLFW + GLEW with OpenGL 4.1");
+    SPDLOG_INFO("Initialising GLFW");
 
     // GLFW initialisation
     glfwSetErrorCallback(error_callback);
@@ -113,6 +117,8 @@ bool init()
     {
         gCamera = new App::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 2.0f, 0.5f);
     }
+
+    SPDLOG_INFO("Initialising GLEW");
 
     // GLEW initialisation
     if (glewInit() != GLEW_OK)
@@ -137,13 +143,21 @@ bool init()
 
     // Mesh initialisation
     {
-        gTestMeshes.push_back(new GL::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES));
-        gTestMeshes.push_back(new GL::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES));
+        gTestMeshes.push_back(new GL::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 5, { 3, 2 }));
+        gTestMeshes.push_back(new GL::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 5, { 3, 2 }));
 
         gTestMeshes[0]->SetPosition(glm::vec3(-1.0f, 0.0f, -2.5f));
         gTestMeshes[0]->SetScale(glm::vec3(0.5f));
         gTestMeshes[1]->SetPosition(glm::vec3(1.0f, 0.0f, -2.5f));
         gTestMeshes[1]->SetScale(glm::vec3(0.65f));
+    }
+
+    // Texture initialisation
+    {
+        stbi_set_flip_vertically_on_load(true);
+        glActiveTexture(GL_TEXTURE0);
+        gTestTextures.push_back(new GL::Texture("assets/textures/brick.png"));
+        gTestTextures.push_back(new GL::Texture("assets/textures/dirt.png"));
     }
 
     // OpenGL flags
@@ -183,11 +197,12 @@ bool loop()
     gTestShader->SetUniformMatrix4fv("view", glm::value_ptr(view));
     gTestShader->SetUniformMatrix4fv("projection", glm::value_ptr(projection));
 
-    for (auto pTestMesh : gTestMeshes)
+    for (size_t i = 0; i < gTestTextures.size(); ++i)
     {
-        pTestMesh->SetRotation(glm::vec3(0.0f, triRotation, 0.0f));
-        gTestShader->SetUniformMatrix4fv("model", glm::value_ptr(pTestMesh->GetModelMatrix()));
-        pTestMesh->Draw();
+        gTestMeshes[i]->SetRotation(glm::vec3(0.0f, triRotation, 0.0f));
+        gTestShader->SetUniformMatrix4fv("model", glm::value_ptr(gTestMeshes[i]->GetModelMatrix()));
+        gTestTextures[i]->Bind();
+        gTestMeshes[i]->Draw();
     }
 
     gWindow->SwapBuffers();

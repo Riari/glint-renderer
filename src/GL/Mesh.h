@@ -14,7 +14,7 @@ namespace GL
     class Mesh
     {
     public:
-        Mesh(std::vector<GLfloat> vertices, std::vector<GLuint> indices);
+        Mesh(std::vector<GLfloat> vertices, std::vector<GLuint> indices, unsigned int vertexLength, std::vector<unsigned int> attributeSizes);
 
         void SetPosition(glm::vec3 position);
         void SetRotation(glm::vec3 rotation);

@@ -5,9 +5,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "Window.h"
+#include "App/Window.h"
 
-namespace App
+namespace World
 {
     class Camera
     {
@@ -15,7 +15,7 @@ namespace App
         Camera(glm::vec3 position, glm::vec3 worldUp, float yaw, float pitch, float moveSpeed, float turnSpeed);
         ~Camera();
 
-        void Update(Window* pWindow, float deltaTime);
+        void Update(App::Window* pWindow, float deltaTime);
 
         glm::mat4 GetViewMatrix();
 

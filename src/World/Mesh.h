@@ -5,11 +5,11 @@
 #include <GL/glew.h>
 #include <glm/mat4x4.hpp>
 
-#include "Buffer/EBO.h"
-#include "Buffer/VAO.h"
-#include "Buffer/VBO.h"
+#include "GL/Buffer/EBO.h"
+#include "GL/Buffer/VAO.h"
+#include "GL/Buffer/VBO.h"
 
-namespace GL
+namespace World
 {
     class Mesh
     {

@@ -42,30 +42,29 @@ if(NOT glfw_POPULATED)
 endif()
 
 set(SOURCES
-    src/App/Camera.cpp
     src/App/Window.cpp
     src/GL/Buffer/BufferObject.cpp
     src/GL/Buffer/EBO.cpp
     src/GL/Buffer/VAO.cpp
     src/GL/Buffer/VBO.cpp
-    src/GL/Mesh.cpp
     src/GL/Object.cpp
     src/GL/Shader.cpp
     src/GL/ShaderProgram.cpp
     src/GL/Texture.cpp
     src/Util/File.cpp
     src/Util/GL.cpp
+    src/World/Camera.cpp
+    src/World/Light.cpp
+    src/World/Mesh.cpp
     src/main.cpp
 )
 
 set(HEADERS
-    src/App/Camera.h
     src/App/Window.h
     src/GL/Buffer/BufferObject.h
     src/GL/Buffer/EBO.h
     src/GL/Buffer/VAO.h
     src/GL/Buffer/VBO.h
-    src/GL/Mesh.h
     src/GL/Object.h
     src/GL/Shader.h
     src/GL/ShaderProgram.h
@@ -73,6 +72,9 @@ set(HEADERS
     src/Util/File.h
     src/Util/GL.h
     src/Util/Random.h
+    src/World/Camera.h
+    src/World/Light.h
+    src/World/Mesh.h
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})

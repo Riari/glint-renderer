@@ -1,6 +1,6 @@
 #include "Camera.h"
 
-namespace App
+namespace World
 {
     Camera::Camera(glm::vec3 position, glm::vec3 worldUp, float yaw, float pitch, float moveSpeed, float turnSpeed)
         : mPosition(position)
@@ -24,7 +24,7 @@ namespace App
         return glm::lookAt(mPosition, mPosition + mFront, mUp);
     }
 
-    void Camera::Update(Window* pWindow, float deltaTime)
+    void Camera::Update(App::Window* pWindow, float deltaTime)
     {
         float velocity = mMoveSpeed * static_cast<float>(deltaTime);
 

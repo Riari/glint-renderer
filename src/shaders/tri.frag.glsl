@@ -5,9 +5,17 @@ in vec2 vertexUVs;
 
 out vec4 colour;
 
+struct DirectionalLight
+{
+    vec3 colour;
+    float ambientIntensity;
+};
+
 uniform sampler2D textureSampler;
+uniform DirectionalLight directionalLight;
 
 void main()
 {
-    colour = texture(textureSampler, vertexUVs) * vertexColour;
+    vec4 ambientColour = vec4(directionalLight.colour, 1.0f) * directionalLight.ambientIntensity;
+    colour = texture(textureSampler, vertexUVs) * ambientColour;
 }

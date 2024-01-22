@@ -1,4 +1,5 @@
 #include "ShaderProgram.h"
+
 #include "Util/GL.h"
 
 using namespace GL;
@@ -47,6 +48,11 @@ void ShaderProgram::SetUniform1i(const char* pName, const int value) const
 void ShaderProgram::SetUniform1f(const char* pName, const float value) const
 {
     glUniform1f(glGetUniformLocation(mId, pName), value);
+}
+
+void ShaderProgram::SetUniform3f(const char* pName, const glm::vec3 value) const
+{
+    glUniform3f(glGetUniformLocation(mId, pName), value.x, value.y, value.z);
 }
 
 void ShaderProgram::SetUniform4fv(const char* pName, const float* pValue) const

@@ -7,9 +7,9 @@ namespace World
     {
     }
 
-    Light::Light(glm::vec3 colour, GLfloat ambientIntensity)
+    Light::Light(const glm::vec3& colour, const GLfloat intensity)
         : mColour(colour)
-        , mAmbientIntensity(ambientIntensity)
+        , mIntensity(intensity)
     {
     }
 
@@ -18,8 +18,8 @@ namespace World
         return mColour;
     }
 
-    GLfloat Light::GetAmbientIntensity() const
+    GLfloat Light::GetIntensity() const
     {
-        return mAmbientIntensity;
+        return mIntensity;
     }
 };

@@ -30,6 +30,11 @@ namespace App
         {
             glfwSetInputMode(mHandle, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
         }
+
+        for (size_t i = 0; i < MAX_KEYS; ++i)
+        {
+            mKeysPressed[i] = false;
+        }
     }
 
     Window::~Window()

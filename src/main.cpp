@@ -13,6 +13,7 @@
 #include "GL/ShaderProgram.h"
 #include "GL/Texture.h"
 #include "World/Camera.h"
+#include "World/DirectionalLight.h"
 #include "World/Light.h"
 #include "World/Mesh.h"
 #include "Util/File.h"
@@ -24,14 +25,15 @@ bool loop();
 App::Window* gWindow;
 World::Camera* gCamera;
 World::Light* gAmbientLight;
-
+World::DirectionalLight* gDirectionalLight;
 GL::ShaderProgram *gTestShader;
 
 const std::vector<GLfloat> PYRAMID_VERTICES = {
-    -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, -1.0f, 1.0f, 0.5f, 0.0f,
-    1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f, 0.5f, 1.0f,
+    // X, Y, Z,             U, V,           NX, NY, NZ
+    -1.0f, -1.0f, 0.0f,     0.0f, 0.0f,     0.0f, 0.0f, 0.0f,
+    0.0f, -1.0f, 1.0f,      0.5f, 0.0f,     0.0f, 0.0f, 0.0f,
+    1.0f, -1.0f, 0.0f,      1.0f, 0.0f,     0.0f, 0.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,       0.5f, 1.0f,     0.0f, 0.0f, 0.0f,
 };
 
 const std::vector<GLuint> PYRAMID_INDICES = {
@@ -86,6 +88,7 @@ int main()
     delete gWindow;
     delete gCamera;
     delete gAmbientLight;
+    delete gDirectionalLight;
     delete gTestShader;
     for (auto mesh : gTestMeshes)
     {
@@ -152,10 +155,11 @@ bool init()
     SPDLOG_INFO("Creating world objects");
     {
         gCamera = new World::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 2.0f, 0.5f);
-        gAmbientLight = new World::Light(glm::vec3(1.0f, 0.0f, 0.0f), 0.6f);
+        gAmbientLight = new World::Light(glm::vec3(1.0f, 0.0f, 0.0f), 0.2f);
+        gDirectionalLight = new World::DirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.85f, glm::vec3(2.0f, -1.0f, -2.0f));
 
-        gTestMeshes.push_back(new World::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 5, { 3, 2 }));
-        gTestMeshes.push_back(new World::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 5, { 3, 2 }));
+        gTestMeshes.push_back(new World::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }));
+        gTestMeshes.push_back(new World::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }));
 
         gTestMeshes[0]->SetPosition(glm::vec3(-1.0f, 0.0f, -2.5f));
         gTestMeshes[0]->SetScale(glm::vec3(0.5f));
@@ -170,6 +174,8 @@ bool init()
         gTestTextures.push_back(new GL::Texture("assets/textures/brick.png"));
         gTestTextures.push_back(new GL::Texture("assets/textures/dirt.png"));
     }
+
+    SPDLOG_INFO("Initialisation complete!");
 
     return true;
 }
@@ -202,8 +208,11 @@ bool loop()
     glm::mat4 view = gCamera->GetViewMatrix();
     gTestShader->SetUniformMatrix4fv("view", glm::value_ptr(view));
     gTestShader->SetUniformMatrix4fv("projection", glm::value_ptr(projection));
-    gTestShader->SetUniform3f("directionalLight.colour", gAmbientLight->GetColour());
-    gTestShader->SetUniform1f("directionalLight.ambientIntensity", gAmbientLight->GetAmbientIntensity());
+    gTestShader->SetUniform3f("ambientLight.colour", gAmbientLight->GetColour());
+    gTestShader->SetUniform1f("ambientLight.intensity", gAmbientLight->GetIntensity());
+    gTestShader->SetUniform3f("directionalLight.colour", gDirectionalLight->GetColour());
+    gTestShader->SetUniform1f("directionalLight.intensity", gDirectionalLight->GetIntensity());
+    gTestShader->SetUniform3f("directionalLight.direction", gDirectionalLight->GetDirection());
 
     for (size_t i = 0; i < gTestTextures.size(); ++i)
     {

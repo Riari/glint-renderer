@@ -54,6 +54,7 @@ set(SOURCES
     src/Util/File.cpp
     src/Util/GL.cpp
     src/World/Camera.cpp
+    src/World/DirectionalLight.cpp
     src/World/Light.cpp
     src/World/Mesh.cpp
     src/main.cpp
@@ -73,6 +74,7 @@ set(HEADERS
     src/Util/GL.h
     src/Util/Random.h
     src/World/Camera.h
+    src/World/DirectionalLight.h
     src/World/Light.h
     src/World/Mesh.h
 )

@@ -20,12 +20,19 @@ namespace World
         void SetRotation(glm::vec3 rotation);
         void SetScale(glm::vec3 scale);
 
+        /// @brief Generates normals based on the vertices and attribute information. CAUTION: overwrites existing normals!
+        /// @param normalAttributeIndex The index into mAttributeSizes corresponding to normal size.
+        void GenerateNormals(size_t normalAttributeIndex);
+
         glm::mat4 GetModelMatrix() const;
 
         void Draw();
 
     private:
         std::vector<GLfloat> mVertices;
+        unsigned int mVertexLength;
+        std::vector<unsigned int> mAttributeSizes;
+
         std::vector<GLuint> mIndices;
 
         GL::VAO mVAO;

@@ -19,9 +19,14 @@ namespace World
 
     }
 
-    glm::mat4 Camera::GetViewMatrix()
+    glm::mat4 Camera::GetViewMatrix() const
     {
         return glm::lookAt(mPosition, mPosition + mFront, mUp);
+    }
+
+    glm::vec3 Camera::GetPosition() const
+    {
+        return mPosition;
     }
 
     void Camera::Update(App::Window* pWindow, float deltaTime)

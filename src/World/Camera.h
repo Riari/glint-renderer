@@ -17,7 +17,8 @@ namespace World
 
         void Update(App::Window* pWindow, float deltaTime);
 
-        glm::mat4 GetViewMatrix();
+        glm::mat4 GetViewMatrix() const;
+        glm::vec3 GetPosition() const;
 
     private:
         glm::vec3 mPosition;

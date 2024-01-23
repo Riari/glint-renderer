@@ -56,6 +56,7 @@ set(SOURCES
     src/World/Camera.cpp
     src/World/DirectionalLight.cpp
     src/World/Light.cpp
+    src/World/Material.cpp
     src/World/Mesh.cpp
     src/main.cpp
 )
@@ -76,6 +77,7 @@ set(HEADERS
     src/World/Camera.h
     src/World/DirectionalLight.h
     src/World/Light.h
+    src/World/Material.h
     src/World/Mesh.h
 )
 

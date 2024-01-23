@@ -7,6 +7,7 @@ layout (location = 2) in vec3 normal;
 out vec4 vertexColour;
 out vec2 vertexUV;
 out vec3 vertexNormal;
+out vec3 vertexFragPosition;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -19,4 +20,5 @@ void main()
 
     vertexUV = uv;
     vertexNormal = mat3(transpose(inverse(model))) * normal;
+    vertexFragPosition = (model * vec4(position, 1.0)).xyz;
 }

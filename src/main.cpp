@@ -15,6 +15,7 @@
 #include "World/Camera.h"
 #include "World/DirectionalLight.h"
 #include "World/Light.h"
+#include "World/Material.h"
 #include "World/Mesh.h"
 #include "Util/File.h"
 #include "Util/GL.h"
@@ -26,13 +27,13 @@ App::Window* gWindow;
 World::Camera* gCamera;
 World::Light* gAmbientLight;
 World::DirectionalLight* gDirectionalLight;
-GL::ShaderProgram *gTestShader;
+GL::ShaderProgram* gTestShader;
 
 const std::vector<GLfloat> PYRAMID_VERTICES = {
     // X, Y, Z,             U, V,           NX, NY, NZ
-    -1.0f, -1.0f, 0.0f,     0.0f, 0.0f,     0.0f, 0.0f, 0.0f,
+    -1.0f, -1.0f, -0.6f,    0.0f, 0.0f,     0.0f, 0.0f, 0.0f,
     0.0f, -1.0f, 1.0f,      0.5f, 0.0f,     0.0f, 0.0f, 0.0f,
-    1.0f, -1.0f, 0.0f,      1.0f, 0.0f,     0.0f, 0.0f, 0.0f,
+    1.0f, -1.0f, -0.6f,     1.0f, 0.0f,     0.0f, 0.0f, 0.0f,
     0.0f, 1.0f, 0.0f,       0.5f, 1.0f,     0.0f, 0.0f, 0.0f,
 };
 
@@ -43,6 +44,7 @@ const std::vector<GLuint> PYRAMID_INDICES = {
     0, 1, 2,
 };
 
+std::vector<World::Material*> gTestMaterials;
 std::vector<World::Mesh*> gTestMeshes;
 std::vector<GL::Texture*> gTestTextures;
 
@@ -90,6 +92,13 @@ int main()
     delete gAmbientLight;
     delete gDirectionalLight;
     delete gTestShader;
+
+    for (auto material : gTestMaterials)
+    {
+        delete material;
+    }
+    gTestMaterials.clear();
+
     for (auto mesh : gTestMeshes)
     {
         delete mesh;
@@ -139,8 +148,8 @@ bool init()
 
     SPDLOG_INFO("Building shaders");
     {
-        std::string vertSource = Util::File::Read("shaders/tri.vert.glsl");
-        std::string fragSource = Util::File::Read("shaders/tri.frag.glsl");
+        std::string vertSource = Util::File::Read("shaders/basic-material.vert.glsl");
+        std::string fragSource = Util::File::Read("shaders/basic-material.frag.glsl");
         gTestShader = new GL::ShaderProgram(vertSource.c_str(), fragSource.c_str());
         if (gTestShader->Build() != 0)
         {
@@ -155,14 +164,19 @@ bool init()
     SPDLOG_INFO("Creating world objects");
     {
         gCamera = new World::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 2.0f, 0.5f);
-        gAmbientLight = new World::Light(glm::vec3(1.0f, 0.0f, 0.0f), 0.2f);
-        gDirectionalLight = new World::DirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.85f, glm::vec3(2.0f, -1.0f, -2.0f));
+        gAmbientLight = new World::Light(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f);
+        gDirectionalLight = new World::DirectionalLight(glm::vec3(0.8f, 0.8f, 1.0f), 0.5f, glm::vec3(0.0f, -1.0f, -0.0f));
+
+        gTestMaterials.push_back(new World::Material(1.0f, 32.0f));
+        gTestMaterials.push_back(new World::Material(0.3f, 4.0f));
 
         gTestMeshes.push_back(new World::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }));
         gTestMeshes.push_back(new World::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }));
 
+        gTestMeshes[0]->SetMaterial(gTestMaterials[0]);
         gTestMeshes[0]->SetPosition(glm::vec3(-1.0f, 0.0f, -2.5f));
         gTestMeshes[0]->SetScale(glm::vec3(0.5f));
+        gTestMeshes[1]->SetMaterial(gTestMaterials[1]);
         gTestMeshes[1]->SetPosition(glm::vec3(1.0f, 0.0f, -2.5f));
         gTestMeshes[1]->SetScale(glm::vec3(0.65f));
     }
@@ -190,11 +204,11 @@ bool loop()
     // Update
     glfwPollEvents();
 
-    triRotation += 0.01f;
-    if (triRotation > 360.0f)
-    {
-        triRotation = -360.0f;
-    }
+    // triRotation += 0.01f;
+    // if (triRotation > 360.0f)
+    // {
+    //     triRotation = -360.0f;
+    // }
 
     glm::mat4 projection = glm::perspective(45.0f, (float)gWindow->GetWidth() / (float)gWindow->GetHeight(), 0.1f, 100.0f);
 
@@ -213,11 +227,14 @@ bool loop()
     gTestShader->SetUniform3f("directionalLight.colour", gDirectionalLight->GetColour());
     gTestShader->SetUniform1f("directionalLight.intensity", gDirectionalLight->GetIntensity());
     gTestShader->SetUniform3f("directionalLight.direction", gDirectionalLight->GetDirection());
+    gTestShader->SetUniform3f("eyePosition", gCamera->GetPosition());
 
     for (size_t i = 0; i < gTestTextures.size(); ++i)
     {
         gTestMeshes[i]->SetRotation(glm::vec3(0.0f, triRotation, 0.0f));
         gTestShader->SetUniformMatrix4fv("model", glm::value_ptr(gTestMeshes[i]->GetModelMatrix()));
+        gTestShader->SetUniform1f("material.specularIntensity", gTestMeshes[i]->GetMaterial()->GetSpecularIntensity());
+        gTestShader->SetUniform1f("material.shininess", gTestMeshes[i]->GetMaterial()->GetShininess());
         gTestTextures[i]->Bind();
         gTestMeshes[i]->Draw();
     }

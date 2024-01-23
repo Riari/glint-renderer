@@ -108,6 +108,16 @@ namespace World
         return model;
     }
 
+    void Mesh::SetMaterial(Material* material)
+    {
+        mMaterial = material;
+    }
+
+    Material* Mesh::GetMaterial() const
+    {
+        return mMaterial;
+    }
+
     void Mesh::Draw()
     {
         assert(mVBO.IsBound() && mEBO.IsBound() && "Mesh buffers are not bound");

@@ -8,6 +8,7 @@
 #include "GL/Buffer/EBO.h"
 #include "GL/Buffer/VAO.h"
 #include "GL/Buffer/VBO.h"
+#include "World/Material.h"
 
 namespace World
 {
@@ -26,6 +27,9 @@ namespace World
 
         glm::mat4 GetModelMatrix() const;
 
+        void SetMaterial(Material* material);
+        Material* GetMaterial() const;
+
         void Draw();
 
     private:
@@ -34,6 +38,8 @@ namespace World
         std::vector<unsigned int> mAttributeSizes;
 
         std::vector<GLuint> mIndices;
+
+        Material* mMaterial{nullptr};
 
         GL::VAO mVAO;
         GL::VBO mVBO;

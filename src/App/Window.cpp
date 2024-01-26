@@ -5,7 +5,7 @@
 namespace App
 {
     const int GL_VERSION_MAJOR = 4;
-    const int GL_VERSION_MINOR = 5;
+    const int GL_VERSION_MINOR = 1;
 
     Window::Window(int width, int height, const char* title)
         : mWidth(width)

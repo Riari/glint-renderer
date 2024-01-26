@@ -11,3 +11,11 @@ Project structure:
 * `src/shaders`: Shader code
 * `src/Util`: Utility functions
 * `src/World`: Stuff that exists in the "world"
+
+## Setup
+
+Requires Conan 2.0 or higher.
+
+Run `conan install . --output-folder=build --build=missing --settings=build_type=Debug` to install dependencies.
+
+Conan will generate `CMakeUserPresets.json`, which should inform CMake of the available presets for building the project.

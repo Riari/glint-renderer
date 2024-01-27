@@ -1,5 +1,8 @@
 #pragma once
 
+#include <unordered_map>
+#include <string>
+
 #include <glm/glm.hpp>
 
 #include "Object.h"
@@ -16,16 +19,20 @@ namespace GL
 
         void Use() const;
 
-        void SetUniform1i(const char* pName, const int value) const;
-        void SetUniform1f(const char* pName, const float value) const;
-        void SetUniform3f(const char* pName, const glm::vec3 value) const;
-        void SetUniform4fv(const char* pName, const float* pValue) const;
-        void SetUniformMatrix4fv(const char* pName, const float* pValue) const;
+        void SetUniform1i(const char* pName, const int value);
+        void SetUniform1f(const char* pName, const float value);
+        void SetUniform3f(const char* pName, const glm::vec3 value);
+        void SetUniform4fv(const char* pName, const float* pValue);
+        void SetUniformMatrix4fv(const char* pName, const float* pValue);
 
     private:
         bool mIsBuilt{false};
 
         Shader* pVertex;
         Shader* pFragment;
+
+        std::unordered_map<std::string, int> mUniforms;
+
+        int GetUniformLocation(const char* pName);
     };
 }

@@ -3,7 +3,6 @@
 #include "Util/GL.h"
 
 using namespace GL;
-using namespace Util::GL;
 
 ShaderProgram::ShaderProgram(const char* vertexSource, const char* fragmentSource) :
     pVertex(new Shader(GL_VERTEX_SHADER, vertexSource)),
@@ -23,7 +22,7 @@ int ShaderProgram::Build()
     glAttachShader(mId, pFragment->GetID());
     glLinkProgram(mId);
 
-    if (!CheckShaderBuildStatus(mId, GL_LINK_STATUS))
+    if (!Util::GL::CheckShaderBuildStatus(mId, GL_LINK_STATUS))
     {
         return -1;
     }

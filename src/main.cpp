@@ -144,6 +144,16 @@ bool init()
     // OpenGL flags
     {
         glEnable(GL_DEPTH_TEST);
+
+        int flags;
+        glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+        if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+        {
+            glEnable(GL_DEBUG_OUTPUT);
+            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+            glDebugMessageCallback(Util::GL::HandleDebugMessage, nullptr);
+            glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+        }
     }
 
     SPDLOG_INFO("Building shaders");
@@ -153,7 +163,6 @@ bool init()
         gTestShader = new GL::ShaderProgram(vertSource.c_str(), fragSource.c_str());
         if (gTestShader->Build() != 0)
         {
-            SPDLOG_ERROR("Shader program failed to build");
             glfwTerminate();
             return false;
         }

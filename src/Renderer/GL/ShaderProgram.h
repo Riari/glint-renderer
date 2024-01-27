@@ -8,7 +8,7 @@
 #include "Object.h"
 #include "Shader.h"
 
-namespace GL
+namespace Renderer::GL
 {
     class ShaderProgram : public Object
     {

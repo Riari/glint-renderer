@@ -4,7 +4,7 @@
 
 #include "Object.h"
 
-namespace GL
+namespace Renderer::GL
 {
     class Texture : public Object
     {

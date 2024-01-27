@@ -8,14 +8,14 @@ find_package(spdlog)
 
 set(SOURCES
     src/App/Window.cpp
-    src/GL/Buffer/BufferObject.cpp
-    src/GL/Buffer/EBO.cpp
-    src/GL/Buffer/VAO.cpp
-    src/GL/Buffer/VBO.cpp
-    src/GL/Object.cpp
-    src/GL/Shader.cpp
-    src/GL/ShaderProgram.cpp
-    src/GL/Texture.cpp
+    src/Renderer/GL/Buffer/BufferObject.cpp
+    src/Renderer/GL/Buffer/EBO.cpp
+    src/Renderer/GL/Buffer/VAO.cpp
+    src/Renderer/GL/Buffer/VBO.cpp
+    src/Renderer/GL/Object.cpp
+    src/Renderer/GL/Shader.cpp
+    src/Renderer/GL/ShaderProgram.cpp
+    src/Renderer/GL/Texture.cpp
     src/Renderer/Light/DirectionalLight.cpp
     src/Renderer/Light/Light.cpp
     src/Renderer/Light/PointLight.cpp
@@ -30,14 +30,14 @@ set(SOURCES
 
 set(HEADERS
     src/App/Window.h
-    src/GL/Buffer/BufferObject.h
-    src/GL/Buffer/EBO.h
-    src/GL/Buffer/VAO.h
-    src/GL/Buffer/VBO.h
-    src/GL/Object.h
-    src/GL/Shader.h
-    src/GL/ShaderProgram.h
-    src/GL/Texture.h
+    src/Renderer/GL/Buffer/BufferObject.h
+    src/Renderer/GL/Buffer/EBO.h
+    src/Renderer/GL/Buffer/VAO.h
+    src/Renderer/GL/Buffer/VBO.h
+    src/Renderer/GL/Object.h
+    src/Renderer/GL/Shader.h
+    src/Renderer/GL/ShaderProgram.h
+    src/Renderer/GL/Texture.h
     src/Renderer/Light/DirectionalLight.h
     src/Renderer/Light/Light.h
     src/Renderer/Light/PointLight.h
@@ -71,5 +71,5 @@ add_custom_command(
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${CMAKE_CURRENT_SOURCE_DIR}/src/shaders
+                ${CMAKE_CURRENT_SOURCE_DIR}/src/Renderer/shaders
                 $<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders)

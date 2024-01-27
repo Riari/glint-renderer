@@ -2,7 +2,7 @@
 
 #include "VAO.h"
 
-using namespace GL;
+using namespace Renderer::GL;
 
 VAO::VAO() : Object()
 {

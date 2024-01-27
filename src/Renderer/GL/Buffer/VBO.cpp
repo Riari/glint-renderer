@@ -1,5 +1,5 @@
 #include "VBO.h"
 
-using namespace GL;
+using namespace Renderer::GL;
 
 VBO::VBO() : BufferObject(GL_ARRAY_BUFFER) {}

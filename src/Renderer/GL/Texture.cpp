@@ -4,7 +4,7 @@
 
 #include "Texture.h"
 
-using namespace GL;
+using namespace Renderer::GL;
 
 Texture::Texture(const char* path) : Object()
 {

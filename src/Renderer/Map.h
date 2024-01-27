@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-#include "GL/Texture.h"
+#include "Renderer/GL/Texture.h"
 
 namespace Renderer
 {

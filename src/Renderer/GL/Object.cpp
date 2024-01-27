@@ -1,6 +1,6 @@
 #include "Object.h"
 
-using namespace GL;
+using namespace Renderer::GL;
 
 Object::Object(GLuint id) : mId(id)
 {

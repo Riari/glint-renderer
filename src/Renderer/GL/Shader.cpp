@@ -3,7 +3,7 @@
 #include "Shader.h"
 #include "Util/GL.h"
 
-using namespace GL;
+using namespace Renderer::GL;
 
 Shader::Shader(GLuint type, const char *source) : mSource(source), Object(glCreateShader(type))
 {

@@ -10,8 +10,7 @@
 #include <stb_image.h>
 
 #include "App/Window.h"
-#include "GL/ShaderProgram.h"
-#include "GL/Texture.h"
+#include "Renderer/GL/ShaderProgram.h"
 #include "Renderer/Light/DirectionalLight.h"
 #include "Renderer/Light/Light.h"
 #include "Renderer/Light/PointLight.h"
@@ -29,7 +28,7 @@ App::Window* gWindow;
 Renderer::Camera* gCamera;
 Renderer::DirectionalLight* gDirectionalLight;
 std::vector<Renderer::PointLight*> gPointLights;
-GL::ShaderProgram* gTestShader;
+Renderer::GL::ShaderProgram* gTestShader;
 
 const std::vector<GLfloat> PYRAMID_VERTICES = {
     // X, Y, Z,             U, V,           NX, NY, NZ
@@ -170,7 +169,7 @@ bool init()
     {
         std::string vertSource = Util::File::Read("shaders/basic-material.vert.glsl");
         std::string fragSource = Util::File::Read("shaders/basic-material.frag.glsl");
-        gTestShader = new GL::ShaderProgram(vertSource.c_str(), fragSource.c_str());
+        gTestShader = new Renderer::GL::ShaderProgram(vertSource.c_str(), fragSource.c_str());
         if (gTestShader->Build() != 0)
         {
             glfwTerminate();

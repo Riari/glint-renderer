@@ -4,11 +4,11 @@
 
 #include "BufferObject.h"
 
-namespace GL
+namespace Renderer::GL
 {
-    class VBO : public BufferObject
+    class EBO : public BufferObject
     {
     public:
-        VBO();
+        EBO();
     };
 }

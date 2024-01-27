@@ -5,9 +5,9 @@
 #include <GL/glew.h>
 #include <glm/mat4x4.hpp>
 
-#include "GL/Buffer/EBO.h"
-#include "GL/Buffer/VAO.h"
-#include "GL/Buffer/VBO.h"
+#include "Renderer/GL/Buffer/EBO.h"
+#include "Renderer/GL/Buffer/VAO.h"
+#include "Renderer/GL/Buffer/VBO.h"
 #include "Material.h"
 
 namespace Renderer

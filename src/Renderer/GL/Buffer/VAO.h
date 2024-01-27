@@ -2,9 +2,9 @@
 
 #include <GL/glew.h>
 
-#include "GL/Object.h"
+#include "Renderer/GL/Object.h"
 
-namespace GL
+namespace Renderer::GL
 {
     class VAO : public Object
     {

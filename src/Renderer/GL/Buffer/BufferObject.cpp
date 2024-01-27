@@ -2,7 +2,7 @@
 
 #include "BufferObject.h"
 
-using namespace GL;
+using namespace Renderer::GL;
 
 BufferObject::BufferObject(GLenum target)
     : Object()

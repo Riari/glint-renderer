@@ -2,7 +2,7 @@
 
 #include "Util/GL.h"
 
-using namespace GL;
+using namespace Renderer::GL;
 
 ShaderProgram::ShaderProgram(const char* vertexSource, const char* fragmentSource) :
     pVertex(new Shader(GL_VERTEX_SHADER, vertexSource)),

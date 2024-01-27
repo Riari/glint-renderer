@@ -2,7 +2,7 @@
 
 #include <GL/glew.h>
 
-namespace GL
+namespace Renderer::GL
 {
     class Object
     {

@@ -1,6 +1,6 @@
 #include "PointLight.h"
 
-namespace World
+namespace Renderer
 {
     PointLight::PointLight()
         : Light()

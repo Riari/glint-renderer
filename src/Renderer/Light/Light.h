@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
-namespace World
+namespace Renderer
 {
     class Light
     {

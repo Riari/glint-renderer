@@ -11,7 +11,7 @@ VAO::VAO() : Object()
 
 void VAO::Bind()
 {
-    assert(("VAO must not be bound already", !mIsBound));
+    if (mIsBound) return;
 
     glBindVertexArray(mId);
     mIsBound = true;

@@ -18,7 +18,7 @@ BufferObject::~BufferObject()
 
 void BufferObject::Bind()
 {
-    assert(("BufferObject must not be bound already", !mIsBound));
+    if (mIsBound) return;
 
     glBindBuffer(mTarget, mId);
     mIsBound = true;

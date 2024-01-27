@@ -1,20 +1,23 @@
-#include "Mesh.h"
+#include "Model.h"
 
 #include <cassert>
 
 #include <glm/gtc/matrix_transform.hpp>
 
-namespace World
+namespace Renderer
 {
-    Mesh::Mesh(std::vector<GLfloat> vertices, std::vector<GLuint> indices, unsigned int vertexLength, std::vector<unsigned int> attributeSizes)
+    Model::Model(std::vector<GLfloat> vertices, std::vector<GLuint> indices, unsigned int vertexLength, std::vector<unsigned int> attributeSizes, bool generateNormals)
         : mVertices(vertices)
         , mVertexLength(vertexLength)
         , mAttributeSizes(attributeSizes)
         , mIndices(indices)
     {
-        // TODO: Remove this call when meshes are proper models imported with real normals
-        // 2 is the assumed index into the attribute size for the normal attribute
-        GenerateNormals(2);
+        if (generateNormals)
+        {
+            // TODO: Remove this call when meshes are proper models imported with real normals
+            // 2 is the assumed index into the attribute size for the normal attribute
+            GenerateNormals(2);
+        }
 
         mVAO.Bind();
 
@@ -33,22 +36,22 @@ namespace World
         mEBO.Write(sizeof(indices[0]) * indices.size(), &mIndices[0], GL_STATIC_DRAW);
     }
 
-    void Mesh::SetPosition(glm::vec3 position)
+    void Model::SetPosition(glm::vec3 position)
     {
         mPosition = position;
     }
 
-    void Mesh::SetRotation(glm::vec3 rotation)
+    void Model::SetRotation(glm::vec3 rotation)
     {
         mRotation = rotation;
     }
 
-    void Mesh::SetScale(glm::vec3 scale)
+    void Model::SetScale(glm::vec3 scale)
     {
         mScale = scale;
     }
 
-    void Mesh::GenerateNormals(size_t normalAttributeIndex)
+    void Model::GenerateNormals(size_t normalAttributeIndex)
     {
         unsigned int normalOffset{0};
         for (size_t i = 0; i < normalAttributeIndex; ++i)
@@ -96,7 +99,7 @@ namespace World
         }
     }
 
-    glm::mat4 Mesh::GetModelMatrix() const
+    glm::mat4 Model::GetModelMatrix() const
     {
         glm::mat4 model(1.0f);
         model = glm::translate(model, mPosition);
@@ -108,20 +111,36 @@ namespace World
         return model;
     }
 
-    void Mesh::SetMaterial(Material* material)
+    void Model::SetMaterial(Material* material)
     {
         mMaterial = material;
     }
 
-    Material* Mesh::GetMaterial() const
+    Material* Model::GetMaterial() const
     {
         return mMaterial;
     }
 
-    void Mesh::Draw()
+    void Model::Bind()
     {
-        assert(mVBO.IsBound() && mEBO.IsBound() && "Mesh buffers are not bound");
+        mVAO.Bind();
+        mVBO.Bind();
+        mEBO.Bind();
 
+        mMaterial->Bind();
+    }
+
+    void Model::Draw()
+    {
         glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, 0);
+    }
+
+    void Model::Unbind()
+    {
+        mVAO.Unbind();
+        mVBO.Unbind();
+        mEBO.Unbind();
+
+        mMaterial->Unbind();
     }
 };

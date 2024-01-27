@@ -1,6 +1,5 @@
 #version 330 core
 
-in vec4 vertexColour;
 in vec2 vertexUV;
 in vec3 vertexNormal;
 in vec3 vertexFragPosition;
@@ -33,6 +32,8 @@ struct PointLight
 
 struct Material
 {
+    bool useTexture;
+    vec3 baseColour;
     float specularIntensity;
     float shininess;
 };
@@ -96,5 +97,12 @@ void main()
     vec4 finalColour = CalcLightByDirection(directionalLight.base, directionalLight.direction);
     finalColour += CalcPointLights();
 
-    colour = texture(textureSampler, vertexUV) * finalColour;
+    if (material.useTexture)
+    {
+        colour = texture(textureSampler, vertexUV) * finalColour;
+    }
+    else
+    {
+        colour = vec4(material.baseColour, 1.0f) * finalColour;
+    }
 }

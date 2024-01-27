@@ -2,7 +2,7 @@
 
 #include "Light.h"
 
-namespace World
+namespace Renderer
 {
     class PointLight : public Light
     {

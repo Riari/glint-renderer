@@ -16,14 +16,15 @@ set(SOURCES
     src/GL/Shader.cpp
     src/GL/ShaderProgram.cpp
     src/GL/Texture.cpp
+    src/Renderer/Light/DirectionalLight.cpp
+    src/Renderer/Light/Light.cpp
+    src/Renderer/Light/PointLight.cpp
+    src/Renderer/Camera.cpp
+    src/Renderer/Map.cpp
+    src/Renderer/Material.cpp
+    src/Renderer/Model.cpp
     src/Util/File.cpp
     src/Util/GL.cpp
-    src/World/Camera.cpp
-    src/World/DirectionalLight.cpp
-    src/World/Light.cpp
-    src/World/Material.cpp
-    src/World/Mesh.cpp
-    src/World/PointLight.cpp
     src/main.cpp
 )
 
@@ -37,15 +38,16 @@ set(HEADERS
     src/GL/Shader.h
     src/GL/ShaderProgram.h
     src/GL/Texture.h
+    src/Renderer/Light/DirectionalLight.h
+    src/Renderer/Light/Light.h
+    src/Renderer/Light/PointLight.h
+    src/Renderer/Camera.h
+    src/Renderer/Map.h
+    src/Renderer/Material.h
+    src/Renderer/Model.h
     src/Util/File.h
     src/Util/GL.h
     src/Util/Random.h
-    src/World/Camera.h
-    src/World/DirectionalLight.h
-    src/World/Light.h
-    src/World/Material.h
-    src/World/Mesh.h
-    src/World/PointLight.h
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})

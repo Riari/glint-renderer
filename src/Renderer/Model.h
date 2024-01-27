@@ -8,14 +8,14 @@
 #include "GL/Buffer/EBO.h"
 #include "GL/Buffer/VAO.h"
 #include "GL/Buffer/VBO.h"
-#include "World/Material.h"
+#include "Material.h"
 
-namespace World
+namespace Renderer
 {
-    class Mesh
+    class Model
     {
     public:
-        Mesh(std::vector<GLfloat> vertices, std::vector<GLuint> indices, unsigned int vertexLength, std::vector<unsigned int> attributeSizes);
+        Model(std::vector<GLfloat> vertices, std::vector<GLuint> indices, unsigned int vertexLength, std::vector<unsigned int> attributeSizes, bool generateNormals);
 
         void SetPosition(glm::vec3 position);
         void SetRotation(glm::vec3 rotation);
@@ -30,7 +30,9 @@ namespace World
         void SetMaterial(Material* material);
         Material* GetMaterial() const;
 
+        void Bind();
         void Draw();
+        void Unbind();
 
     private:
         std::vector<GLfloat> mVertices;

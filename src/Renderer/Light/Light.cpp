@@ -1,6 +1,6 @@
 #include "Light.h"
 
-namespace World
+namespace Renderer
 {
     Light::Light()
         : Light(glm::vec3(1.0f), 1.0f, 1.0f)

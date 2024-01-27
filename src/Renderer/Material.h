@@ -2,19 +2,27 @@
 
 #include <GL/glew.h>
 
-namespace World
+#include "Map.h"
+
+namespace Renderer
 {
     class Material
     {
     public:
         Material();
-        Material(GLfloat specularIntensity, GLfloat shininess);
-        ~Material() = default;
+        Material(Map* baseMap, GLfloat specularIntensity, GLfloat shininess);
+        ~Material();
 
+        Map* GetBaseMap() const;
         GLfloat GetSpecularIntensity() const;
         GLfloat GetShininess() const;
 
+        void Bind() const;
+        void Unbind() const;
+
     private:
+        Map* mBaseMap;
+
         GLfloat mSpecularIntensity;
         GLfloat mShininess;
     };

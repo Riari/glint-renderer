@@ -12,12 +12,13 @@
 #include "App/Window.h"
 #include "GL/ShaderProgram.h"
 #include "GL/Texture.h"
-#include "World/Camera.h"
-#include "World/DirectionalLight.h"
-#include "World/Light.h"
-#include "World/Material.h"
-#include "World/Mesh.h"
-#include "World/PointLight.h"
+#include "Renderer/Light/DirectionalLight.h"
+#include "Renderer/Light/Light.h"
+#include "Renderer/Light/PointLight.h"
+#include "Renderer/Camera.h"
+#include "Renderer/Map.h"
+#include "Renderer/Material.h"
+#include "Renderer/Model.h"
 #include "Util/File.h"
 #include "Util/GL.h"
 
@@ -25,9 +26,9 @@ bool init();
 bool loop();
 
 App::Window* gWindow;
-World::Camera* gCamera;
-World::DirectionalLight* gDirectionalLight;
-std::vector<World::PointLight*> gPointLights;
+Renderer::Camera* gCamera;
+Renderer::DirectionalLight* gDirectionalLight;
+std::vector<Renderer::PointLight*> gPointLights;
 GL::ShaderProgram* gTestShader;
 
 const std::vector<GLfloat> PYRAMID_VERTICES = {
@@ -45,11 +46,19 @@ const std::vector<GLuint> PYRAMID_INDICES = {
     0, 1, 2,
 };
 
-std::vector<World::Material*> gTestMaterials;
-std::vector<World::Mesh*> gTestMeshes;
-std::vector<GL::Texture*> gTestTextures;
+const std::vector<GLfloat> FLOOR_VERTICES = {
+    -10.0f, 0.0f, -10.0f,   0.0f, 0.0f,     0.0f, -1.0f, 0.0f,
+    10.0f, 0.0f, -10.0f,    10.0f, 0.0f,    0.0f, -1.0f, 0.0f,
+    -10.0f, 0.0f, 10.0f,    0.0f, 10.0f,    0.0f, -1.0f, 0.0f,
+    10.0f, 0.0f, 10.0f,     10.0f, 10.0f,   0.0f, -1.0f, 0.0f,
+};
 
-float triRotation = 0.0f;
+const std::vector<GLuint> FLOOR_INDICES = {
+    0, 2, 1,
+    1, 2, 3,
+};
+
+std::vector<Renderer::Model*> gTestModels;
 
 int gFramesPerSecond;
 double gDeltaTime;
@@ -100,17 +109,11 @@ int main()
 
     delete gTestShader;
 
-    for (auto material : gTestMaterials)
+    for (auto model : gTestModels)
     {
-        delete material;
+        delete model;
     }
-    gTestMaterials.clear();
-
-    for (auto mesh : gTestMeshes)
-    {
-        delete mesh;
-    }
-    gTestMeshes.clear();
+    gTestModels.clear();
 
     glfwTerminate();
 
@@ -177,34 +180,35 @@ bool init()
         gTestShader->Use();
     }
 
+    // TODO: Implement asset management for loading and sharing things like textures
+
     SPDLOG_INFO("Creating world objects");
     {
-        gCamera = new World::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 2.0f, 0.5f);
-        gDirectionalLight = new World::DirectionalLight(glm::vec3(0.8f, 0.8f, 1.0f), 0.5f, 0.5f, glm::vec3(0.0f, -1.0f, -0.0f));
+        gCamera = new Renderer::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 2.0f, 0.5f);
+        gDirectionalLight = new Renderer::DirectionalLight(glm::vec3(0.8f, 0.8f, 1.0f), 0.5f, 0.5f, glm::vec3(0.0f, -1.0f, -0.0f));
 
-        gPointLights.push_back(new World::PointLight(glm::vec3(0.0f, 0.0f, 1.0f), 0.0f, 1.0f, glm::vec3(-2.5f, 1.0f, -2.0f), 0.3f, 0.1f, 0.1f));
-        gPointLights.push_back(new World::PointLight(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f, 1.0f, glm::vec3(2.5f, 1.0f, -2.0f), 0.3f, 0.1f, 0.1f));
+        gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, 1.0f, glm::vec3(0, 1.0f, -5.0f), 0.3f, 0.1f, 0.1f));
+        gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f, 1.0f, glm::vec3(2.5f, 1.0f, -2.0f), 0.3f, 0.1f, 0.1f));
+        gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.0f, 0.0f, 1.0f), 0.0f, 1.0f, glm::vec3(-2.5f, 1.0f, -2.0f), 0.3f, 0.1f, 0.1f));
 
-        gTestMaterials.push_back(new World::Material(1.0f, 32.0f));
-        gTestMaterials.push_back(new World::Material(0.3f, 4.0f));
+        gTestModels.push_back(new Renderer::Model(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true));
+        gTestModels.push_back(new Renderer::Model(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true));
+        gTestModels.push_back(new Renderer::Model(FLOOR_VERTICES, FLOOR_INDICES, 8, { 3, 2, 3 }, false));
 
-        gTestMeshes.push_back(new World::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }));
-        gTestMeshes.push_back(new World::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }));
-
-        gTestMeshes[0]->SetMaterial(gTestMaterials[0]);
-        gTestMeshes[0]->SetPosition(glm::vec3(-1.0f, 0.0f, -2.5f));
-        gTestMeshes[0]->SetScale(glm::vec3(0.5f));
-        gTestMeshes[1]->SetMaterial(gTestMaterials[1]);
-        gTestMeshes[1]->SetPosition(glm::vec3(1.0f, 0.0f, -2.5f));
-        gTestMeshes[1]->SetScale(glm::vec3(0.65f));
-    }
-
-    SPDLOG_INFO("Creating test textures");
-    {
+        // TODO: These are temporary calls for the textures that will be loaded for the materials below
         stbi_set_flip_vertically_on_load(true);
         glActiveTexture(GL_TEXTURE0);
-        gTestTextures.push_back(new GL::Texture("assets/textures/brick.png"));
-        gTestTextures.push_back(new GL::Texture("assets/textures/dirt.png"));
+
+        gTestModels[0]->SetMaterial(new Renderer::Material(new Renderer::Map("assets/textures/brick.png"), 1.0f, 32.0f));
+        gTestModels[0]->SetPosition(glm::vec3(-1.0f, 0.0f, -2.5f));
+        gTestModels[0]->SetScale(glm::vec3(0.5f));
+
+        gTestModels[1]->SetMaterial(new Renderer::Material(new Renderer::Map("assets/textures/dirt.png"), 0.3f, 4.0f));
+        gTestModels[1]->SetPosition(glm::vec3(1.0f, 0.0f, -2.5f));
+        gTestModels[1]->SetScale(glm::vec3(0.65f));
+
+        gTestModels[2]->SetMaterial(new Renderer::Material(new Renderer::Map(glm::vec3(0.2f, 0.2f, 0.2f)), 0.3f, 4.0f));
+        gTestModels[2]->SetPosition(glm::vec3(0.0f, -0.5f, 0.0f));
     }
 
     SPDLOG_INFO("Initialisation complete!");
@@ -221,12 +225,6 @@ bool loop()
 
     // Update
     glfwPollEvents();
-
-    // triRotation += 0.01f;
-    // if (triRotation > 360.0f)
-    // {
-    //     triRotation = -360.0f;
-    // }
 
     glm::mat4 projection = glm::perspective(45.0f, (float)gWindow->GetWidth() / (float)gWindow->GetHeight(), 0.1f, 100.0f);
 
@@ -263,14 +261,29 @@ bool loop()
         gTestShader->SetUniform1f(light + ".exponent", gPointLights[i]->GetExponent());
     }
 
-    for (size_t i = 0; i < gTestTextures.size(); ++i)
+    for (size_t i = 0; i < gTestModels.size(); ++i)
     {
-        gTestMeshes[i]->SetRotation(glm::vec3(0.0f, triRotation, 0.0f));
-        gTestShader->SetUniformMatrix4fv("model", glm::value_ptr(gTestMeshes[i]->GetModelMatrix()));
-        gTestShader->SetUniform1f("material.specularIntensity", gTestMeshes[i]->GetMaterial()->GetSpecularIntensity());
-        gTestShader->SetUniform1f("material.shininess", gTestMeshes[i]->GetMaterial()->GetShininess());
-        gTestTextures[i]->Bind();
-        gTestMeshes[i]->Draw();
+        Renderer::Model* model = gTestModels[i];
+        Renderer::Material* material = model->GetMaterial();
+
+        gTestShader->SetUniformMatrix4fv("model", glm::value_ptr(model->GetModelMatrix()));
+
+        if (material->GetBaseMap()->GetType() == Renderer::MapType::COLOUR)
+        {
+            gTestShader->SetUniform1i("material.useTexture", 0);
+            gTestShader->SetUniform3f("material.baseColour", material->GetBaseMap()->GetColour());
+        }
+        else
+        {
+            gTestShader->SetUniform1i("material.useTexture", 1);
+        }
+
+        gTestShader->SetUniform1f("material.specularIntensity", material->GetSpecularIntensity());
+        gTestShader->SetUniform1f("material.shininess", material->GetShininess());
+
+        model->Bind();
+        model->Draw();
+        model->Unbind();
     }
 
     gWindow->SwapBuffers();

@@ -1,6 +1,6 @@
 #include "DirectionalLight.h"
 
-namespace World
+namespace Renderer
 {
     DirectionalLight::DirectionalLight()
         : Light()

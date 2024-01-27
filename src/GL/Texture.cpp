@@ -36,6 +36,8 @@ void Texture::Generate(int width, int height, unsigned char* data)
 
 void Texture::Bind()
 {
+    if (mIsBound) return;
+
     glBindTexture(GL_TEXTURE_2D, mId);
     mIsBound = true;
 }

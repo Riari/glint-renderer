@@ -1,6 +1,6 @@
 #include "Camera.h"
 
-namespace World
+namespace Renderer
 {
     Camera::Camera(glm::vec3 position, glm::vec3 worldUp, float yaw, float pitch, float moveSpeed, float turnSpeed)
         : mPosition(position)

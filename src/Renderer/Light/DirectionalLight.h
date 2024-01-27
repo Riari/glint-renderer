@@ -2,7 +2,7 @@
 
 #include "Light.h"
 
-namespace World
+namespace Renderer
 {
     class DirectionalLight : public Light
     {

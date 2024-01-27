@@ -7,7 +7,7 @@
 
 #include "App/Window.h"
 
-namespace World
+namespace Renderer
 {
     class Camera
     {

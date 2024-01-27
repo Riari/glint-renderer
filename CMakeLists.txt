@@ -23,6 +23,7 @@ set(SOURCES
     src/World/Light.cpp
     src/World/Material.cpp
     src/World/Mesh.cpp
+    src/World/PointLight.cpp
     src/main.cpp
 )
 
@@ -44,6 +45,7 @@ set(HEADERS
     src/World/Light.h
     src/World/Material.h
     src/World/Mesh.h
+    src/World/PointLight.h
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})

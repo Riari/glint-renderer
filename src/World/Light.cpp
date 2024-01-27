@@ -3,13 +3,14 @@
 namespace World
 {
     Light::Light()
-        : Light(glm::vec3(1.0f), 1.0f)
+        : Light(glm::vec3(1.0f), 1.0f, 1.0f)
     {
     }
 
-    Light::Light(const glm::vec3& colour, const GLfloat intensity)
+    Light::Light(const glm::vec3& colour, const GLfloat ambientIntensity, const GLfloat diffuseIntensity)
         : mColour(colour)
-        , mIntensity(intensity)
+        , mAmbientIntensity(ambientIntensity)
+        , mDiffuseIntensity(diffuseIntensity)
     {
     }
 
@@ -18,8 +19,13 @@ namespace World
         return mColour;
     }
 
-    GLfloat Light::GetIntensity() const
+    GLfloat Light::GetAmbientIntensity() const
     {
-        return mIntensity;
+        return mAmbientIntensity;
+    }
+
+    GLfloat Light::GetDiffuseIntensity() const
+    {
+        return mDiffuseIntensity;
     }
 };

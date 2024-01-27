@@ -9,14 +9,16 @@ namespace World
     {
     public:
         Light();
-        Light(const glm::vec3& colour, const GLfloat intensity);
+        Light(const glm::vec3& colour, const GLfloat ambientIntensity, const GLfloat diffuseIntensity);
         ~Light() = default;
 
         glm::vec3 GetColour() const;
-        GLfloat GetIntensity() const;
+        GLfloat GetAmbientIntensity() const;
+        GLfloat GetDiffuseIntensity() const;
 
     private:
         glm::vec3 mColour;
-        GLfloat mIntensity;
+        GLfloat mAmbientIntensity;
+        GLfloat mDiffuseIntensity;
     };
 };

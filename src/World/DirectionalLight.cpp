@@ -8,8 +8,8 @@ namespace World
     {
     }
 
-    DirectionalLight::DirectionalLight(const glm::vec3& color, const GLfloat intensity, const glm::vec3& direction)
-        : Light(color, intensity)
+    DirectionalLight::DirectionalLight(const glm::vec3& color, const GLfloat ambientIntensity, const GLfloat diffuseIntensity, const glm::vec3& direction)
+        : Light(color, ambientIntensity, diffuseIntensity)
         , mDirection(direction)
     {
     }

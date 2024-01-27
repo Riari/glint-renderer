@@ -17,6 +17,7 @@
 #include "World/Light.h"
 #include "World/Material.h"
 #include "World/Mesh.h"
+#include "World/PointLight.h"
 #include "Util/File.h"
 #include "Util/GL.h"
 
@@ -25,8 +26,8 @@ bool loop();
 
 App::Window* gWindow;
 World::Camera* gCamera;
-World::Light* gAmbientLight;
 World::DirectionalLight* gDirectionalLight;
+std::vector<World::PointLight*> gPointLights;
 GL::ShaderProgram* gTestShader;
 
 const std::vector<GLfloat> PYRAMID_VERTICES = {
@@ -89,8 +90,14 @@ int main()
 
     delete gWindow;
     delete gCamera;
-    delete gAmbientLight;
     delete gDirectionalLight;
+
+    for (auto pointLight : gPointLights)
+    {
+        delete pointLight;
+    }
+    gPointLights.clear();
+
     delete gTestShader;
 
     for (auto material : gTestMaterials)
@@ -173,8 +180,10 @@ bool init()
     SPDLOG_INFO("Creating world objects");
     {
         gCamera = new World::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 2.0f, 0.5f);
-        gAmbientLight = new World::Light(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f);
-        gDirectionalLight = new World::DirectionalLight(glm::vec3(0.8f, 0.8f, 1.0f), 0.5f, glm::vec3(0.0f, -1.0f, -0.0f));
+        gDirectionalLight = new World::DirectionalLight(glm::vec3(0.8f, 0.8f, 1.0f), 0.5f, 0.5f, glm::vec3(0.0f, -1.0f, -0.0f));
+
+        gPointLights.push_back(new World::PointLight(glm::vec3(0.0f, 0.0f, 1.0f), 0.0f, 1.0f, glm::vec3(-2.5f, 1.0f, -2.0f), 0.3f, 0.1f, 0.1f));
+        gPointLights.push_back(new World::PointLight(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f, 1.0f, glm::vec3(2.5f, 1.0f, -2.0f), 0.3f, 0.1f, 0.1f));
 
         gTestMaterials.push_back(new World::Material(1.0f, 32.0f));
         gTestMaterials.push_back(new World::Material(0.3f, 4.0f));
@@ -231,12 +240,25 @@ bool loop()
     glm::mat4 view = gCamera->GetViewMatrix();
     gTestShader->SetUniformMatrix4fv("view", glm::value_ptr(view));
     gTestShader->SetUniformMatrix4fv("projection", glm::value_ptr(projection));
-    gTestShader->SetUniform3f("ambientLight.colour", gAmbientLight->GetColour());
-    gTestShader->SetUniform1f("ambientLight.intensity", gAmbientLight->GetIntensity());
-    gTestShader->SetUniform3f("directionalLight.colour", gDirectionalLight->GetColour());
-    gTestShader->SetUniform1f("directionalLight.intensity", gDirectionalLight->GetIntensity());
+    gTestShader->SetUniform3f("directionalLight.base.colour", gDirectionalLight->GetColour());
+    gTestShader->SetUniform1f("directionalLight.base.ambientIntensity", gDirectionalLight->GetAmbientIntensity());
+    gTestShader->SetUniform1f("directionalLight.base.diffuseIntensity", gDirectionalLight->GetDiffuseIntensity());
     gTestShader->SetUniform3f("directionalLight.direction", gDirectionalLight->GetDirection());
     gTestShader->SetUniform3f("eyePosition", gCamera->GetPosition());
+
+    gTestShader->SetUniform1i("pointLightCount", gPointLights.size());
+
+    for (size_t i = 0; i < gPointLights.size(); ++i)
+    {
+        std::string light = "pointLights[" + std::to_string(i) + "]";
+        gTestShader->SetUniform3f((light + ".base.colour").c_str(), gPointLights[i]->GetColour());
+        gTestShader->SetUniform1f((light + ".base.ambientIntensity").c_str(), gPointLights[i]->GetAmbientIntensity());
+        gTestShader->SetUniform1f((light + ".base.diffuseIntensity").c_str(), gPointLights[i]->GetDiffuseIntensity());
+        gTestShader->SetUniform3f((light + ".position").c_str(), gPointLights[i]->GetPosition());
+        gTestShader->SetUniform1f((light + ".constant").c_str(), gPointLights[i]->GetConstant());
+        gTestShader->SetUniform1f((light + ".linear").c_str(), gPointLights[i]->GetLinear());
+        gTestShader->SetUniform1f((light + ".exponent").c_str(), gPointLights[i]->GetExponent());
+    }
 
     for (size_t i = 0; i < gTestTextures.size(); ++i)
     {

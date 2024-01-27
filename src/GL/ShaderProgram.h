@@ -19,11 +19,11 @@ namespace GL
 
         void Use() const;
 
-        void SetUniform1i(const char* pName, const int value);
-        void SetUniform1f(const char* pName, const float value);
-        void SetUniform3f(const char* pName, const glm::vec3 value);
-        void SetUniform4fv(const char* pName, const float* pValue);
-        void SetUniformMatrix4fv(const char* pName, const float* pValue);
+        void SetUniform1i(std::string name, const int value);
+        void SetUniform1f(std::string name, const float value);
+        void SetUniform3f(std::string name, const glm::vec3 value);
+        void SetUniform4fv(std::string name, const float* pValue);
+        void SetUniformMatrix4fv(std::string name, const float* pValue);
 
     private:
         bool mIsBuilt{false};
@@ -33,6 +33,6 @@ namespace GL
 
         std::unordered_map<std::string, int> mUniforms;
 
-        int GetUniformLocation(const char* pName);
+        int GetUniformLocation(std::string& name);
     };
 }

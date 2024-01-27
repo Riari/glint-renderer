@@ -236,6 +236,9 @@ bool loop()
 
     gCamera->Update(gWindow, static_cast<float>(gDeltaTime));
 
+    // TODO: Come up with a better way of managing the interface between world objects (e.g. lights) and shader programs
+    // TODO: Validate shader inputs (e.g. point light count must not exceed MAX_POINT_LIGHTS)
+
     gTestShader->Use();
     glm::mat4 view = gCamera->GetViewMatrix();
     gTestShader->SetUniformMatrix4fv("view", glm::value_ptr(view));
@@ -251,13 +254,13 @@ bool loop()
     for (size_t i = 0; i < gPointLights.size(); ++i)
     {
         std::string light = "pointLights[" + std::to_string(i) + "]";
-        gTestShader->SetUniform3f((light + ".base.colour").c_str(), gPointLights[i]->GetColour());
-        gTestShader->SetUniform1f((light + ".base.ambientIntensity").c_str(), gPointLights[i]->GetAmbientIntensity());
-        gTestShader->SetUniform1f((light + ".base.diffuseIntensity").c_str(), gPointLights[i]->GetDiffuseIntensity());
-        gTestShader->SetUniform3f((light + ".position").c_str(), gPointLights[i]->GetPosition());
-        gTestShader->SetUniform1f((light + ".constant").c_str(), gPointLights[i]->GetConstant());
-        gTestShader->SetUniform1f((light + ".linear").c_str(), gPointLights[i]->GetLinear());
-        gTestShader->SetUniform1f((light + ".exponent").c_str(), gPointLights[i]->GetExponent());
+        gTestShader->SetUniform3f(light + ".base.colour", gPointLights[i]->GetColour());
+        gTestShader->SetUniform1f(light + ".base.ambientIntensity", gPointLights[i]->GetAmbientIntensity());
+        gTestShader->SetUniform1f(light + ".base.diffuseIntensity", gPointLights[i]->GetDiffuseIntensity());
+        gTestShader->SetUniform3f(light + ".position", gPointLights[i]->GetPosition());
+        gTestShader->SetUniform1f(light + ".constant", gPointLights[i]->GetConstant());
+        gTestShader->SetUniform1f(light + ".linear", gPointLights[i]->GetLinear());
+        gTestShader->SetUniform1f(light + ".exponent", gPointLights[i]->GetExponent());
     }
 
     for (size_t i = 0; i < gTestTextures.size(); ++i)

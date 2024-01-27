@@ -71,11 +71,6 @@ vec4 CalcLightByDirection(Light light, vec3 direction)
     return (ambientColour + diffuseColour + specularColour);
 }
 
-vec4 CalcDirectionalLight()
-{
-    return CalcLightByDirection(directionalLight.base, directionalLight.direction);
-}
-
 vec4 CalcPointLights()
 {
     vec4 totalColour = vec4(0, 0, 0, 0);
@@ -98,7 +93,7 @@ vec4 CalcPointLights()
 
 void main()
 {
-    vec4 finalColour = CalcDirectionalLight();
+    vec4 finalColour = CalcLightByDirection(directionalLight.base, directionalLight.direction);
     finalColour += CalcPointLights();
 
     colour = texture(textureSampler, vertexUV) * finalColour;

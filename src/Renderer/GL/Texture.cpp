@@ -6,15 +6,12 @@
 
 using namespace Renderer::GL;
 
-Texture::Texture(const char* path) : Object()
+Texture::Texture(const Asset::Type::Image& image) : Object()
 {
     glGenTextures(1, &mId);
 
-    int width, height, channels;
-    unsigned char* data = stbi_load(path, &width, &height, &channels, 0);
-
     Bind();
-    Generate(width, height, data);
+    Generate(image.width, image.height, image.data);
 }
 
 Texture::~Texture()

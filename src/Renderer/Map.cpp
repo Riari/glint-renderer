@@ -8,9 +8,9 @@ namespace Renderer
     {
     }
 
-    Map::Map(const char* texturePath)
+    Map::Map(const Asset::Type::Image& image)
         : mType(MapType::TEXTURE)
-        , mTexture(new GL::Texture(texturePath))
+        , mTexture(new GL::Texture(image))
     {
     }
 

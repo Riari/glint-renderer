@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 
+#include "Asset/Type/Image.h"
 #include "Renderer/GL/Texture.h"
 
 namespace Renderer
@@ -16,7 +17,7 @@ namespace Renderer
     {
     public:
         Map(glm::vec3 colour);
-        Map(const char* texturePath);
+        Map(const Asset::Type::Image& image);
         ~Map();
 
         MapType GetType() const;

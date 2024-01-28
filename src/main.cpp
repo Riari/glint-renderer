@@ -10,6 +10,8 @@
 #include <stb_image.h>
 
 #include "App/Window.h"
+#include "Asset/Asset.h"
+#include "Asset/Manager.h"
 #include "Renderer/GL/ShaderProgram.h"
 #include "Renderer/Light/DirectionalLight.h"
 #include "Renderer/Light/Light.h"
@@ -18,7 +20,6 @@
 #include "Renderer/Map.h"
 #include "Renderer/Material.h"
 #include "Renderer/Model.h"
-#include "Util/File.h"
 #include "Util/GL.h"
 
 bool init();
@@ -64,10 +65,10 @@ double gDeltaTime;
 
 int main()
 {
-    SPDLOG_INFO("Beginning initialisation...");
+    spdlog::info("Beginning initialisation...");
     if (!init())
     {
-        SPDLOG_ERROR("Initialisation failed");
+        spdlog::error("Initialisation failed");
         return -1;
     }
 
@@ -75,7 +76,7 @@ int main()
     double previousFPSUpdateTime = previousTime;
     int frameCount{0};
 
-    SPDLOG_INFO("Entering main loop...");
+    spdlog::info("Entering main loop...");
     while (true)
     {
         if (!loop()) break;
@@ -94,7 +95,7 @@ int main()
         }
     }
 
-    SPDLOG_INFO("Cleaning up...");
+    spdlog::info("Cleaning up...");
 
     delete gWindow;
     delete gCamera;
@@ -121,12 +122,12 @@ int main()
 
 static void glfw_error_callback(int error, const char* description)
 {
-    SPDLOG_ERROR("Error {}: {}", error, description);
+    spdlog::error("Error {}: {}", error, description);
 }
 
 bool init()
 {
-    SPDLOG_INFO("Initialising GLFW");
+    spdlog::info("Initialising GLFW");
 
     // GLFW
     glfwSetErrorCallback(glfw_error_callback);
@@ -140,7 +141,7 @@ bool init()
         gWindow->MakeCurrent();
     }
 
-    SPDLOG_INFO("Initialising GLEW");
+    spdlog::info("Initialising GLEW");
 
     // GLEW
     if (glewInit() != GLEW_OK)
@@ -148,7 +149,7 @@ bool init()
         return false;
     }
 
-    SPDLOG_INFO("Setting OpenGL flags");
+    spdlog::info("Setting OpenGL flags");
 
     // OpenGL flags
     {
@@ -165,7 +166,31 @@ bool init()
         }
     }
 
-    SPDLOG_INFO("Building shaders");
+    spdlog::info("Registering assets");
+    {
+        stbi_set_flip_vertically_on_load(true);
+
+        Asset::Loader imageLoader = [](const std::string& basePath, const nlohmann::json& json, std::unordered_map<std::string, Asset::Asset*>& assets) {
+            Asset::Type::Image* image = new Asset::Type::Image();
+
+            std::string path = basePath + "/" + json.at("Path").get<std::string>();
+            image->data = stbi_load(path.c_str(), &(image->width), &(image->height), &(image->channels), 0);
+
+            // TODO: Implement asset validation
+            if (!image->data) {
+                spdlog::error("Failed to load image '{}' from path '{}'", json.at("Name").get<std::string>(), path);
+                return;
+            }
+
+            assets.emplace(json.at("Name").get<std::string>(), image);
+        };
+
+        Asset::Manager::RegisterType("Image", imageLoader);
+
+        Asset::Manager::LoadAssets();
+    }
+
+    spdlog::info("Building shaders");
     {
         std::string vertSource = Util::File::Read("shaders/basic-material.vert.glsl");
         std::string fragSource = Util::File::Read("shaders/basic-material.frag.glsl");
@@ -179,9 +204,7 @@ bool init()
         gTestShader->Use();
     }
 
-    // TODO: Implement asset management for loading and sharing things like textures
-
-    SPDLOG_INFO("Creating world objects");
+    spdlog::info("Creating world objects");
     {
         gCamera = new Renderer::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 2.0f, 0.5f);
         gDirectionalLight = new Renderer::DirectionalLight(glm::vec3(0.8f, 0.8f, 1.0f), 0.5f, 0.5f, glm::vec3(0.0f, -1.0f, -0.0f));
@@ -194,15 +217,16 @@ bool init()
         gTestModels.push_back(new Renderer::Model(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true));
         gTestModels.push_back(new Renderer::Model(FLOOR_VERTICES, FLOOR_INDICES, 8, { 3, 2, 3 }, false));
 
-        // TODO: These are temporary calls for the textures that will be loaded for the materials below
-        stbi_set_flip_vertically_on_load(true);
         glActiveTexture(GL_TEXTURE0);
 
-        gTestModels[0]->SetMaterial(new Renderer::Material(new Renderer::Map("assets/textures/brick.png"), 1.0f, 32.0f));
+        auto brick = Asset::Manager::Get<Asset::Type::Image>("Brick");
+        auto dirt = Asset::Manager::Get<Asset::Type::Image>("Dirt");
+
+        gTestModels[0]->SetMaterial(new Renderer::Material(new Renderer::Map(brick), 1.0f, 32.0f));
         gTestModels[0]->SetPosition(glm::vec3(-1.0f, 0.0f, -2.5f));
         gTestModels[0]->SetScale(glm::vec3(0.5f));
 
-        gTestModels[1]->SetMaterial(new Renderer::Material(new Renderer::Map("assets/textures/dirt.png"), 0.3f, 4.0f));
+        gTestModels[1]->SetMaterial(new Renderer::Material(new Renderer::Map(dirt), 0.3f, 4.0f));
         gTestModels[1]->SetPosition(glm::vec3(1.0f, 0.0f, -2.5f));
         gTestModels[1]->SetScale(glm::vec3(0.65f));
 
@@ -210,7 +234,7 @@ bool init()
         gTestModels[2]->SetPosition(glm::vec3(0.0f, -0.5f, 0.0f));
     }
 
-    SPDLOG_INFO("Initialisation complete!");
+    spdlog::info("Initialisation complete!");
 
     return true;
 }

@@ -4,6 +4,7 @@ project(udemy-opengl LANGUAGES CXX)
 find_package(glew)
 find_package(glfw3)
 find_package(glm)
+find_package(nlohmann_json)
 find_package(spdlog)
 
 set(SOURCES
@@ -30,6 +31,9 @@ set(SOURCES
 
 set(HEADERS
     src/App/Window.h
+    src/Asset/Type/Image.h
+    src/Asset/Asset.h
+    src/Asset/Manager.h
     src/Renderer/GL/Buffer/BufferObject.h
     src/Renderer/GL/Buffer/EBO.h
     src/Renderer/GL/Buffer/VAO.h
@@ -54,11 +58,17 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 add_subdirectory(external)
 
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(${PROJECT_NAME} PRIVATE GLEW::GLEW glfw glm::glm spdlog::spdlog stb)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    GLEW::GLEW
+    glfw
+    glm::glm
+    nlohmann_json::nlohmann_json
+    spdlog::spdlog
+    stb)
 
 # Copy assets
 add_custom_command(

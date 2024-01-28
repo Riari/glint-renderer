@@ -73,6 +73,16 @@
         "xmemory": "cpp",
         "xtr1common": "cpp",
         "xutility": "cpp",
-        "xtree": "cpp"
+        "xtree": "cpp",
+        "deque": "cpp",
+        "map": "cpp",
+        "queue": "cpp",
+        "ranges": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp",
+        "*.asset": "json",
+        "any": "cpp",
+        "numeric": "cpp",
+        "valarray": "cpp"
     }
 }

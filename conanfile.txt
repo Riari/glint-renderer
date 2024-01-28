@@ -2,6 +2,7 @@
 glew/2.2.0
 glfw/3.3.8
 glm/cci.20230113
+nlohmann_json/3.11.3
 spdlog/1.13.0
 
 [tool_requires]

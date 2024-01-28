@@ -105,7 +105,7 @@ namespace Util::GL
         {
             GLchar infoLog[1024];
             glGetShaderInfoLog(objectId, 1024, nullptr, infoLog);
-            SPDLOG_ERROR("Shader program failed to build: {}", infoLog);
+            spdlog::error("Shader program failed to build: {}", infoLog);
         }
 
         return success;

@@ -12,5 +12,10 @@ namespace Asset::Type
         int height;
         int channels;
         unsigned char* data;
+
+        ~Image() override
+        {
+            free(data);
+        }
     };
 };

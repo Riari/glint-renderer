@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include <GL/glew.h>
 
 #include "Object.h"
@@ -10,13 +12,13 @@ namespace Renderer::GL
     {
 
     public:
-        Shader(GLuint type, const char *source);
+        Shader(GLuint type);
         ~Shader();
 
-        int Build();
+        int Build(const std::string& source);
 
     private:
         bool mIsBuilt{false};
-        const char* mSource;
+        const std::string mSource;
     };
 }

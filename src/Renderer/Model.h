@@ -16,6 +16,7 @@ namespace Renderer
     {
     public:
         Model(std::vector<GLfloat> vertices, std::vector<GLuint> indices, unsigned int vertexLength, std::vector<unsigned int> attributeSizes, bool generateNormals);
+        ~Model();
 
         void SetPosition(glm::vec3 position);
         void SetRotation(glm::vec3 rotation);

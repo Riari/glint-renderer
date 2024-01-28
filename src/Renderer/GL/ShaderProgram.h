@@ -13,9 +13,9 @@ namespace Renderer::GL
     class ShaderProgram : public Object
     {
     public:
-        ShaderProgram(const char* vertexSource, const char* fragmentSource);
+        ShaderProgram();
 
-        int Build();
+        int Build(const std::string& vertexSource, const std::string& fragmentSource);
 
         void Use() const;
 
@@ -28,8 +28,8 @@ namespace Renderer::GL
     private:
         bool mIsBuilt{false};
 
-        Shader* pVertex;
-        Shader* pFragment;
+        Shader* mVertex;
+        Shader* mFragment;
 
         std::unordered_map<std::string, int> mUniforms;
 

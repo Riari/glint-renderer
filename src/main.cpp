@@ -182,7 +182,7 @@ bool init()
                 return;
             }
 
-            assets.emplace(json.at("Name").get<std::string>(), image);
+            assets.emplace(json.at("Name").get<std::string>(), std::move(image));
         };
 
         Asset::Manager::RegisterType("Image", imageLoader);
@@ -194,8 +194,8 @@ bool init()
     {
         std::string vertSource = Util::File::Read("shaders/basic-material.vert.glsl");
         std::string fragSource = Util::File::Read("shaders/basic-material.frag.glsl");
-        gTestShader = new Renderer::GL::ShaderProgram(vertSource.c_str(), fragSource.c_str());
-        if (gTestShader->Build() != 0)
+        gTestShader = new Renderer::GL::ShaderProgram();
+        if (gTestShader->Build(vertSource, fragSource) != 0)
         {
             glfwTerminate();
             return false;
@@ -219,14 +219,11 @@ bool init()
 
         glActiveTexture(GL_TEXTURE0);
 
-        auto brick = Asset::Manager::Get<Asset::Type::Image>("Brick");
-        auto dirt = Asset::Manager::Get<Asset::Type::Image>("Dirt");
-
-        gTestModels[0]->SetMaterial(new Renderer::Material(new Renderer::Map(brick), 1.0f, 32.0f));
+        gTestModels[0]->SetMaterial(new Renderer::Material(new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Brick")), 1.0f, 32.0f));
         gTestModels[0]->SetPosition(glm::vec3(-1.0f, 0.0f, -2.5f));
         gTestModels[0]->SetScale(glm::vec3(0.5f));
 
-        gTestModels[1]->SetMaterial(new Renderer::Material(new Renderer::Map(dirt), 0.3f, 4.0f));
+        gTestModels[1]->SetMaterial(new Renderer::Material(new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Dirt")), 0.3f, 4.0f));
         gTestModels[1]->SetPosition(glm::vec3(1.0f, 0.0f, -2.5f));
         gTestModels[1]->SetScale(glm::vec3(0.65f));
 

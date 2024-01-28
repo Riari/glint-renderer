@@ -36,6 +36,14 @@ namespace Renderer
         mEBO.Write(sizeof(indices[0]) * indices.size(), &mIndices[0], GL_STATIC_DRAW);
     }
 
+    Model::~Model()
+    {
+        if (mMaterial != nullptr)
+        {
+            delete mMaterial;
+        }
+    }
+
     void Model::SetPosition(glm::vec3 position)
     {
         mPosition = position;

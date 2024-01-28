@@ -4,22 +4,22 @@
 
 using namespace Renderer::GL;
 
-ShaderProgram::ShaderProgram(const char* vertexSource, const char* fragmentSource) :
-    pVertex(new Shader(GL_VERTEX_SHADER, vertexSource)),
-    pFragment(new Shader(GL_FRAGMENT_SHADER, fragmentSource)),
+ShaderProgram::ShaderProgram() :
+    mVertex(new Shader(GL_VERTEX_SHADER)),
+    mFragment(new Shader(GL_FRAGMENT_SHADER)),
     Object(glCreateProgram())
 {
 }
 
-int ShaderProgram::Build()
+int ShaderProgram::Build(const std::string& vertexSource, const std::string& fragmentSource)
 {
     if (mIsBuilt) return 0;
 
-    pVertex->Build();
-    pFragment->Build();
+    mVertex->Build(vertexSource);
+    mFragment->Build(fragmentSource);
 
-    glAttachShader(mId, pVertex->GetID());
-    glAttachShader(mId, pFragment->GetID());
+    glAttachShader(mId, mVertex->GetID());
+    glAttachShader(mId, mFragment->GetID());
     glLinkProgram(mId);
 
     if (!Util::GL::CheckShaderBuildStatus(mId, GL_LINK_STATUS))
@@ -28,8 +28,8 @@ int ShaderProgram::Build()
     }
 
     mIsBuilt = true;
-    delete pVertex;
-    delete pFragment;
+    delete mVertex;
+    delete mFragment;
 
     return 0;
 }

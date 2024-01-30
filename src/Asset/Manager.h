@@ -41,8 +41,9 @@ namespace Asset
                 auto it = instance.mLoaders.find(type);
                 if (it != instance.mLoaders.end()) {
                     it->second(entry.path().parent_path().string(), json, instance.mAssets);
+                    spdlog::info("[assets] Loaded '{}'", entry.path().filename().string());
                 } else {
-                    spdlog::error("No loader registered for asset type '{}'", type);
+                    spdlog::error("[assets] No loader registered for asset type '{}'", type);
                 }
             }
         }
@@ -61,10 +62,10 @@ namespace Asset
                 if (derivedAsset) {
                     return *derivedAsset;
                 } else {
-                    spdlog::error("Failed to cast asset '{}' to type '{}'", name, typeid(T).name());
+                    spdlog::error("[assets] Failed to cast asset '{}' to type '{}'", name, typeid(T).name());
                 }
             } else {
-                spdlog::error("Asset '{}' not found", name);
+                spdlog::error("[assets] Asset '{}' not found", name);
             }
 
             return *reinterpret_cast<const T*>(nullptr);

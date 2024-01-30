@@ -11,7 +11,7 @@ Texture::Texture(const Asset::Type::Image& image) : Object()
     glGenTextures(1, &mId);
 
     Bind();
-    Generate(image.width, image.height, image.data);
+    GenerateFromImage(image);
 }
 
 Texture::~Texture()
@@ -19,11 +19,13 @@ Texture::~Texture()
     glDeleteTextures(1, &mId);
 }
 
-void Texture::Generate(int width, int height, unsigned char* data)
+void Texture::GenerateFromImage(const Asset::Type::Image& image)
 {
     assert(("Texture must be bound before operating on it", mIsBound));
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    auto format = image.channels == 3 ? GL_RGB : GL_RGBA;
+
+    glTexImage2D(GL_TEXTURE_2D, 0, format, image.width, image.height, 0, format, GL_UNSIGNED_BYTE, image.data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

@@ -215,18 +215,12 @@ bool init()
         gCamera = new Renderer::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 5.0f, 0.5f);
         gDirectionalLight = new Renderer::DirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.1f, glm::vec3(0.0f, 0.0f, -1.0f));
 
-        gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.0f, 0.0f), 0.1f, 0.1f, glm::vec3(0.0f, 1.0f, -5.0f), 0.3f, 0.1f, 0.1f));
-        gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.0f, 1.0f, 0.0f), 0.1f, 0.1f, glm::vec3(2.5f, 1.0f, -2.0f), 0.3f, 0.1f, 0.1f));
-        gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.0f, 0.0f, 1.0f), 0.1f, 0.1f, glm::vec3(-2.5f, 1.0f, -2.0f), 0.3f, 0.1f, 0.1f));
+        gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.0f, 0.5f), 0.0f, 1.0f, glm::vec3(0.0f, 0.5f, -3.0f), 0.3f, 0.1f, 0.1f));
+        gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.0f, 0.75f, 1.0f), 0.0f, 1.0f, glm::vec3(3.0f, 0.5f, 0.0f), 0.3f, 0.1f, 0.1f));
+        gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.42f, 0.0f), 0.0f, 1.0f, glm::vec3(-3.0f, 0.5f, 0.0f), 0.3f, 0.1f, 0.1f));
+        gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.47f, 0.0f, 1.0f), 0.0f, 1.0f, glm::vec3(0.0f, 0.5f, 3.0f), 0.3f, 0.1f, 0.1f));
 
-	// spotLights[0] = SpotLight(1.0f, 1.0f, 1.0f, // RGB
-	// 					0.0f, 2.0f, // ambientIntensity, diffuseIntensity
-	// 					0.0f, 0.0f, 0.0f, // position
-	// 					0.0f, -1.0f, 0.0f, // direction
-	// 					1.0f, 0.0f, 0.0f, // constant, linear, exponent
-	// 					20.0f); // edge (degrees)
-
-        gSpotLights.push_back(new Renderer::SpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 1.0f, glm::vec3(0.0f, 2.0f, -2.0f), glm::vec3(0.0f, -1.0f, 0.0f), 0.5f, 0.1f, 0.1f, 50.0f));
+        gSpotLights.push_back(new Renderer::SpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 2.0f, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, 0.1f, 0.1f, 20.0f));
 
         gTestModels.push_back(new Renderer::Model(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true));
         gTestModels.push_back(new Renderer::Model(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true));
@@ -236,16 +230,17 @@ bool init()
 
         auto mapBrick = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Brick"));
         auto mapDirt = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Dirt"));
+        auto mapStainlessSteel = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("StainlessSteel"));
 
         gTestModels[0]->SetMaterial(new Renderer::Material(mapBrick, 1.0f, 32.0f));
-        gTestModels[0]->SetPosition(glm::vec3(-1.0f, 0.0f, -2.5f));
+        gTestModels[0]->SetPosition(glm::vec3(-1.0f, 5.0f, -2.5f));
         gTestModels[0]->SetScale(glm::vec3(0.5f));
 
         gTestModels[1]->SetMaterial(new Renderer::Material(mapDirt, 0.3f, 4.0f));
-        gTestModels[1]->SetPosition(glm::vec3(1.0f, 0.0f, -2.5f));
+        gTestModels[1]->SetPosition(glm::vec3(1.0f, 5.0f, -2.5f));
         gTestModels[1]->SetScale(glm::vec3(0.65f));
 
-        gTestModels[2]->SetMaterial(new Renderer::Material(mapDirt, 4.0f, 256.0f));
+        gTestModels[2]->SetMaterial(new Renderer::Material(mapStainlessSteel, 2.0f, 128.0f));
         gTestModels[2]->SetPosition(glm::vec3(0.0f, -2.0f, 0.0f));
     }
 

@@ -17,6 +17,6 @@ namespace Renderer::GL
         void Unbind();
 
     private:
-        void Generate(int width, int height, unsigned char* data);
+        void GenerateFromImage(const Asset::Type::Image& image);
     };
 };

@@ -16,6 +16,7 @@
 #include "Renderer/Light/DirectionalLight.h"
 #include "Renderer/Light/Light.h"
 #include "Renderer/Light/PointLight.h"
+#include "Renderer/Light/SpotLight.h"
 #include "Renderer/Camera.h"
 #include "Renderer/Map.h"
 #include "Renderer/Material.h"
@@ -29,6 +30,7 @@ App::Window* gWindow;
 Renderer::Camera* gCamera;
 Renderer::DirectionalLight* gDirectionalLight;
 std::vector<Renderer::PointLight*> gPointLights;
+std::vector<Renderer::SpotLight*> gSpotLights;
 Renderer::GL::ShaderProgram* gTestShader;
 
 const std::vector<GLfloat> PYRAMID_VERTICES = {
@@ -77,10 +79,8 @@ int main()
     int frameCount{0};
 
     spdlog::info("Entering main loop...");
-    while (true)
+    while (loop())
     {
-        if (!loop()) break;
-
         double currentTime = glfwGetTime();
         frameCount++;
 
@@ -106,6 +106,12 @@ int main()
         delete pointLight;
     }
     gPointLights.clear();
+
+    for (auto spotLight : gSpotLights)
+    {
+        delete spotLight;
+    }
+    gSpotLights.clear();
 
     delete gTestShader;
 
@@ -166,6 +172,20 @@ bool init()
         }
     }
 
+    spdlog::info("Building shaders");
+    {
+        std::string vertSource = Util::File::Read("shaders/basic-material.vert.glsl");
+        std::string fragSource = Util::File::Read("shaders/basic-material.frag.glsl");
+        gTestShader = new Renderer::GL::ShaderProgram();
+        if (gTestShader->Build(vertSource, fragSource) != 0)
+        {
+            glfwTerminate();
+            return false;
+        }
+
+        gTestShader->Use();
+    }
+
     spdlog::info("Registering assets");
     {
         stbi_set_flip_vertically_on_load(true);
@@ -190,28 +210,23 @@ bool init()
         Asset::Manager::LoadAssets();
     }
 
-    spdlog::info("Building shaders");
-    {
-        std::string vertSource = Util::File::Read("shaders/basic-material.vert.glsl");
-        std::string fragSource = Util::File::Read("shaders/basic-material.frag.glsl");
-        gTestShader = new Renderer::GL::ShaderProgram();
-        if (gTestShader->Build(vertSource, fragSource) != 0)
-        {
-            glfwTerminate();
-            return false;
-        }
-
-        gTestShader->Use();
-    }
-
     spdlog::info("Creating world objects");
     {
-        gCamera = new Renderer::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 2.0f, 0.5f);
-        gDirectionalLight = new Renderer::DirectionalLight(glm::vec3(0.8f, 0.8f, 1.0f), 0.5f, 0.5f, glm::vec3(0.0f, -1.0f, -0.0f));
+        gCamera = new Renderer::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 5.0f, 0.5f);
+        gDirectionalLight = new Renderer::DirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.1f, glm::vec3(0.0f, 0.0f, -1.0f));
 
-        gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, 1.0f, glm::vec3(0, 1.0f, -5.0f), 0.3f, 0.1f, 0.1f));
-        gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f, 1.0f, glm::vec3(2.5f, 1.0f, -2.0f), 0.3f, 0.1f, 0.1f));
-        gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.0f, 0.0f, 1.0f), 0.0f, 1.0f, glm::vec3(-2.5f, 1.0f, -2.0f), 0.3f, 0.1f, 0.1f));
+        gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.0f, 0.0f), 0.1f, 0.1f, glm::vec3(0.0f, 1.0f, -5.0f), 0.3f, 0.1f, 0.1f));
+        gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.0f, 1.0f, 0.0f), 0.1f, 0.1f, glm::vec3(2.5f, 1.0f, -2.0f), 0.3f, 0.1f, 0.1f));
+        gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.0f, 0.0f, 1.0f), 0.1f, 0.1f, glm::vec3(-2.5f, 1.0f, -2.0f), 0.3f, 0.1f, 0.1f));
+
+	// spotLights[0] = SpotLight(1.0f, 1.0f, 1.0f, // RGB
+	// 					0.0f, 2.0f, // ambientIntensity, diffuseIntensity
+	// 					0.0f, 0.0f, 0.0f, // position
+	// 					0.0f, -1.0f, 0.0f, // direction
+	// 					1.0f, 0.0f, 0.0f, // constant, linear, exponent
+	// 					20.0f); // edge (degrees)
+
+        gSpotLights.push_back(new Renderer::SpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 1.0f, glm::vec3(0.0f, 2.0f, -2.0f), glm::vec3(0.0f, -1.0f, 0.0f), 0.5f, 0.1f, 0.1f, 50.0f));
 
         gTestModels.push_back(new Renderer::Model(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true));
         gTestModels.push_back(new Renderer::Model(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true));
@@ -219,16 +234,19 @@ bool init()
 
         glActiveTexture(GL_TEXTURE0);
 
-        gTestModels[0]->SetMaterial(new Renderer::Material(new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Brick")), 1.0f, 32.0f));
+        auto mapBrick = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Brick"));
+        auto mapDirt = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Dirt"));
+
+        gTestModels[0]->SetMaterial(new Renderer::Material(mapBrick, 1.0f, 32.0f));
         gTestModels[0]->SetPosition(glm::vec3(-1.0f, 0.0f, -2.5f));
         gTestModels[0]->SetScale(glm::vec3(0.5f));
 
-        gTestModels[1]->SetMaterial(new Renderer::Material(new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Dirt")), 0.3f, 4.0f));
+        gTestModels[1]->SetMaterial(new Renderer::Material(mapDirt, 0.3f, 4.0f));
         gTestModels[1]->SetPosition(glm::vec3(1.0f, 0.0f, -2.5f));
         gTestModels[1]->SetScale(glm::vec3(0.65f));
 
-        gTestModels[2]->SetMaterial(new Renderer::Material(new Renderer::Map(glm::vec3(0.2f, 0.2f, 0.2f)), 0.3f, 4.0f));
-        gTestModels[2]->SetPosition(glm::vec3(0.0f, -0.5f, 0.0f));
+        gTestModels[2]->SetMaterial(new Renderer::Material(mapDirt, 4.0f, 256.0f));
+        gTestModels[2]->SetPosition(glm::vec3(0.0f, -2.0f, 0.0f));
     }
 
     spdlog::info("Initialisation complete!");
@@ -279,6 +297,22 @@ bool loop()
         gTestShader->SetUniform1f(light + ".constant", gPointLights[i]->GetConstant());
         gTestShader->SetUniform1f(light + ".linear", gPointLights[i]->GetLinear());
         gTestShader->SetUniform1f(light + ".exponent", gPointLights[i]->GetExponent());
+    }
+
+    gTestShader->SetUniform1i("spotLightCount", gSpotLights.size());
+
+    for (size_t i = 0; i < gSpotLights.size(); ++i)
+    {
+        std::string light = "spotLights[" + std::to_string(i) + "]";
+        gTestShader->SetUniform3f(light + ".base.base.colour", gSpotLights[i]->GetColour());
+        gTestShader->SetUniform1f(light + ".base.base.ambientIntensity", gSpotLights[i]->GetAmbientIntensity());
+        gTestShader->SetUniform1f(light + ".base.base.diffuseIntensity", gSpotLights[i]->GetDiffuseIntensity());
+        gTestShader->SetUniform3f(light + ".base.position", gSpotLights[i]->GetPosition());
+        gTestShader->SetUniform1f(light + ".base.constant", gSpotLights[i]->GetConstant());
+        gTestShader->SetUniform1f(light + ".base.linear", gSpotLights[i]->GetLinear());
+        gTestShader->SetUniform1f(light + ".base.exponent", gSpotLights[i]->GetExponent());
+        gTestShader->SetUniform3f(light + ".direction", gSpotLights[i]->GetDirection());
+        gTestShader->SetUniform1f(light + ".edgeCosine", gSpotLights[i]->GetEdgeCosine());
     }
 
     for (size_t i = 0; i < gTestModels.size(); ++i)

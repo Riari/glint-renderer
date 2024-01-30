@@ -21,7 +21,7 @@ namespace Renderer::GL
 
         void SetUniform1i(std::string name, const int value);
         void SetUniform1f(std::string name, const float value);
-        void SetUniform3f(std::string name, const glm::vec3 value);
+        void SetUniform3f(std::string name, const glm::vec3& value);
         void SetUniform4fv(std::string name, const float* pValue);
         void SetUniformMatrix4fv(std::string name, const float* pValue);
 

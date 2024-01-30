@@ -8,7 +8,14 @@ namespace Renderer
     {
     public:
         PointLight();
-        PointLight(const glm::vec3& color, const GLfloat ambientIntensity, const GLfloat diffuseIntensity, const glm::vec3& position, const float constant, const float linear, const float exponent);
+        PointLight(
+            const glm::vec3& color,
+            const float ambientIntensity,
+            const float diffuseIntensity,
+            const glm::vec3& position,
+            const float constant,
+            const float linear,
+            const float exponent);
         ~PointLight() = default;
 
         glm::vec3 GetPosition() const;
@@ -16,7 +23,7 @@ namespace Renderer
         float GetLinear() const;
         float GetExponent() const;
 
-    private:
+    protected:
         glm::vec3 mPosition;
         float mConstant, mLinear, mExponent;
     };

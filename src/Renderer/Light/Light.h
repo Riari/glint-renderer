@@ -1,6 +1,5 @@
 #pragma once
 
-#include <GL/glew.h>
 #include <glm/glm.hpp>
 
 namespace Renderer
@@ -9,16 +8,16 @@ namespace Renderer
     {
     public:
         Light();
-        Light(const glm::vec3& colour, const GLfloat ambientIntensity, const GLfloat diffuseIntensity);
+        Light(const glm::vec3& colour, const float ambientIntensity, const float diffuseIntensity);
         ~Light() = default;
 
         glm::vec3 GetColour() const;
-        GLfloat GetAmbientIntensity() const;
-        GLfloat GetDiffuseIntensity() const;
+        float GetAmbientIntensity() const;
+        float GetDiffuseIntensity() const;
 
     private:
         glm::vec3 mColour;
-        GLfloat mAmbientIntensity;
-        GLfloat mDiffuseIntensity;
+        float mAmbientIntensity;
+        float mDiffuseIntensity;
     };
 };

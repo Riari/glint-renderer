@@ -8,7 +8,7 @@ namespace Renderer
     {
     }
 
-    DirectionalLight::DirectionalLight(const glm::vec3& color, const GLfloat ambientIntensity, const GLfloat diffuseIntensity, const glm::vec3& direction)
+    DirectionalLight::DirectionalLight(const glm::vec3& color, const float ambientIntensity, const float diffuseIntensity, const glm::vec3& direction)
         : Light(color, ambientIntensity, diffuseIntensity)
         , mDirection(direction)
     {

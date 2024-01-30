@@ -20,6 +20,7 @@ set(SOURCES
     src/Renderer/Light/DirectionalLight.cpp
     src/Renderer/Light/Light.cpp
     src/Renderer/Light/PointLight.cpp
+    src/Renderer/Light/SpotLight.cpp
     src/Renderer/Camera.cpp
     src/Renderer/Map.cpp
     src/Renderer/Material.cpp
@@ -45,6 +46,7 @@ set(HEADERS
     src/Renderer/Light/DirectionalLight.h
     src/Renderer/Light/Light.h
     src/Renderer/Light/PointLight.h
+    src/Renderer/Light/SpotLight.h
     src/Renderer/Camera.h
     src/Renderer/Map.h
     src/Renderer/Material.h

@@ -49,7 +49,7 @@ void ShaderProgram::SetUniform1f(std::string name, const float value)
     glUniform1f(GetUniformLocation(name), value);
 }
 
-void ShaderProgram::SetUniform3f(std::string name, const glm::vec3 value)
+void ShaderProgram::SetUniform3f(std::string name, const glm::vec3& value)
 {
     glUniform3f(GetUniformLocation(name), value.x, value.y, value.z);
 }

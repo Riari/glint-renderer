@@ -7,7 +7,7 @@ namespace Renderer
     {
     }
 
-    Light::Light(const glm::vec3& colour, const GLfloat ambientIntensity, const GLfloat diffuseIntensity)
+    Light::Light(const glm::vec3& colour, const float ambientIntensity, const float diffuseIntensity)
         : mColour(colour)
         , mAmbientIntensity(ambientIntensity)
         , mDiffuseIntensity(diffuseIntensity)
@@ -19,12 +19,12 @@ namespace Renderer
         return mColour;
     }
 
-    GLfloat Light::GetAmbientIntensity() const
+    float Light::GetAmbientIntensity() const
     {
         return mAmbientIntensity;
     }
 
-    GLfloat Light::GetDiffuseIntensity() const
+    float Light::GetDiffuseIntensity() const
     {
         return mDiffuseIntensity;
     }

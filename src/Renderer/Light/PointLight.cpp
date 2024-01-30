@@ -11,7 +11,14 @@ namespace Renderer
     {
     }
 
-    PointLight::PointLight(const glm::vec3& color, const GLfloat ambientIntensity, const GLfloat diffuseIntensity, const glm::vec3& position, const float constant, const float linear, const float exponent)
+    PointLight::PointLight(
+        const glm::vec3& color,
+        const float ambientIntensity,
+        const float diffuseIntensity,
+        const glm::vec3& position,
+        const float constant,
+        const float linear,
+        const float exponent)
         : Light(color, ambientIntensity, diffuseIntensity)
         , mPosition(position)
         , mConstant(constant)

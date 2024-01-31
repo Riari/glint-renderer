@@ -6,42 +6,12 @@
 
 namespace Renderer
 {
-    Model::Model(std::vector<GLfloat> vertices, std::vector<GLuint> indices, unsigned int vertexLength, std::vector<unsigned int> attributeSizes, bool generateNormals)
-        : mVertices(vertices)
-        , mVertexLength(vertexLength)
-        , mAttributeSizes(attributeSizes)
-        , mIndices(indices)
+    Model::Model()
     {
-        if (generateNormals)
-        {
-            // TODO: Remove this call when meshes are proper models imported with real normals
-            // 2 is the assumed index into the attribute size for the normal attribute
-            GenerateNormals(2);
-        }
-
-        mVAO.Bind();
-
-        mVBO.Bind();
-        mVBO.Write(sizeof(vertices[0]) * vertices.size(), &mVertices[0], GL_STATIC_DRAW);
-
-        unsigned int prevAttributesSize = 0;
-        for (unsigned int i = 0; i < attributeSizes.size(); ++i)
-        {
-            mVAO.SetAttributePointer(i, attributeSizes[i], sizeof(vertices[0]) * vertexLength, (void*)(sizeof(vertices[0]) * prevAttributesSize));
-            mVAO.EnableAttributePointer(i);
-            prevAttributesSize += attributeSizes[i];
-        }
-
-        mEBO.Bind();
-        mEBO.Write(sizeof(indices[0]) * indices.size(), &mIndices[0], GL_STATIC_DRAW);
     }
 
     Model::~Model()
     {
-        if (mMaterial != nullptr)
-        {
-            delete mMaterial;
-        }
     }
 
     void Model::SetPosition(glm::vec3 position)
@@ -59,54 +29,6 @@ namespace Renderer
         mScale = scale;
     }
 
-    void Model::GenerateNormals(size_t normalAttributeIndex)
-    {
-        unsigned int normalOffset{0};
-        for (size_t i = 0; i < normalAttributeIndex; ++i)
-        {
-            normalOffset += mAttributeSizes[i];
-        }
-
-        for (size_t i = 0; i < mIndices.size(); i += 3)
-        {
-            unsigned int index0 = mIndices[i] * mVertexLength;
-            unsigned int index1 = mIndices[i + 1] * mVertexLength;
-            unsigned int index2 = mIndices[i + 2] * mVertexLength;
-
-            glm::vec3 v1(mVertices[index1] - mVertices[index0], mVertices[index1 + 1] - mVertices[index0 + 1], mVertices[index1 + 2] - mVertices[index0 + 2]);
-            glm::vec3 v2(mVertices[index2] - mVertices[index0], mVertices[index2 + 1] - mVertices[index0 + 1], mVertices[index2 + 2] - mVertices[index0 + 2]);
-
-            glm::vec3 normal = glm::cross(v1, v2);
-            normal = glm::normalize(normal);
-
-            index0 += normalOffset;
-            index1 += normalOffset;
-            index2 += normalOffset;
-
-            mVertices[index0] += normal.x;
-            mVertices[index0 + 1] += normal.y;
-            mVertices[index0 + 2] += normal.z;
-
-            mVertices[index1] += normal.x;
-            mVertices[index1 + 1] += normal.y;
-            mVertices[index1 + 2] += normal.z;
-
-            mVertices[index2] += normal.x;
-            mVertices[index2 + 1] += normal.y;
-            mVertices[index2 + 2] += normal.z;
-        }
-
-        for (size_t i = 0; i < mVertices.size() / mVertexLength; ++i)
-        {
-            unsigned int normalIndex = i * mVertexLength + normalOffset;
-            glm::vec3 normal(mVertices[normalIndex], mVertices[normalIndex + 1], mVertices[normalIndex + 2]);
-            normal = glm::normalize(normal);
-            mVertices[normalIndex] = normal.x;
-            mVertices[normalIndex + 1] = normal.y;
-            mVertices[normalIndex + 2] = normal.z;
-        }
-    }
-
     glm::mat4 Model::GetModelMatrix() const
     {
         glm::mat4 model(1.0f);
@@ -119,36 +41,36 @@ namespace Renderer
         return model;
     }
 
-    void Model::SetMaterial(Material* material)
+    void Model::AddMesh(Mesh* mesh, Material* material)
     {
-        mMaterial = material;
+        mMaterials.push_back(material);
+        size_t materialIndex = mMaterials.size() - 1;
+        AddMesh(mesh, materialIndex);
     }
 
-    Material* Model::GetMaterial() const
+    void Model::AddMesh(Mesh* mesh, size_t materialIndex)
     {
-        return mMaterial;
+        mMeshes.push_back(mesh);
+        mMeshToMaterial.push_back(materialIndex);
     }
 
-    void Model::Bind()
+    void Model::AddMaterial(Material* material)
     {
-        mVAO.Bind();
-        mVBO.Bind();
-        mEBO.Bind();
-
-        mMaterial->Bind();
+        mMaterials.push_back(material);
     }
 
-    void Model::Draw()
+    std::vector<Mesh*> Model::GetMeshes() const
     {
-        glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, 0);
+        return mMeshes;
     }
 
-    void Model::Unbind()
+    std::vector<Material*> Model::GetMaterials() const
     {
-        mVAO.Unbind();
-        mVBO.Unbind();
-        mEBO.Unbind();
+        return mMaterials;
+    }
 
-        mMaterial->Unbind();
+    std::vector<size_t> Model::GetMeshToMaterialIndices() const
+    {
+        return mMeshToMaterial;
     }
 };

@@ -8,7 +8,6 @@
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
-#include "Asset/Type/Image.h"
 #include "Asset.h"
 #include "Util/File.h"
 

@@ -1,5 +1,6 @@
 #include <vector>
 
+#include <assimp/Importer.hpp>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -10,6 +11,8 @@
 #include <stb_image.h>
 
 #include "App/Window.h"
+#include "Asset/Type/Image.h"
+#include "Asset/Type/Model.h"
 #include "Asset/Asset.h"
 #include "Asset/Manager.h"
 #include "Renderer/GL/ShaderProgram.h"
@@ -20,6 +23,7 @@
 #include "Renderer/Camera.h"
 #include "Renderer/Map.h"
 #include "Renderer/Material.h"
+#include "Renderer/Mesh.h"
 #include "Renderer/Model.h"
 #include "Util/GL.h"
 
@@ -204,8 +208,13 @@ bool init()
 
             assets.emplace(json.at("Name").get<std::string>(), std::move(image));
         };
-
         Asset::Manager::RegisterType("Image", imageLoader);
+
+        Asset::Loader modelLoader = [](const std::string& basePath, const nlohmann::json& json, std::unordered_map<std::string, Asset::Asset*>& assets) {
+            Asset::Type::Model* model = new Asset::Type::Model();
+
+            Assimp::Importer importer = Assimp::Importer();
+        };
 
         Asset::Manager::LoadAssets();
     }
@@ -222,9 +231,9 @@ bool init()
 
         gSpotLights.push_back(new Renderer::SpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 2.0f, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, 0.1f, 0.1f, 20.0f));
 
-        gTestModels.push_back(new Renderer::Model(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true));
-        gTestModels.push_back(new Renderer::Model(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true));
-        gTestModels.push_back(new Renderer::Model(FLOOR_VERTICES, FLOOR_INDICES, 8, { 3, 2, 3 }, false));
+        gTestModels.push_back(new Renderer::Model());
+        gTestModels.push_back(new Renderer::Model());
+        gTestModels.push_back(new Renderer::Model());
 
         glActiveTexture(GL_TEXTURE0);
 
@@ -232,15 +241,21 @@ bool init()
         auto mapDirt = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Dirt"));
         auto mapStainlessSteel = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("StainlessSteel"));
 
-        gTestModels[0]->SetMaterial(new Renderer::Material(mapBrick, 1.0f, 32.0f));
-        gTestModels[0]->SetPosition(glm::vec3(-1.0f, 5.0f, -2.5f));
+        gTestModels[0]->AddMesh(
+            new Renderer::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true),
+            new Renderer::Material(mapBrick, 1.0f, 32.0f));
+        gTestModels[0]->SetPosition(glm::vec3(-1.0f, 2.0f, -2.5f));
         gTestModels[0]->SetScale(glm::vec3(0.5f));
 
-        gTestModels[1]->SetMaterial(new Renderer::Material(mapDirt, 0.3f, 4.0f));
-        gTestModels[1]->SetPosition(glm::vec3(1.0f, 5.0f, -2.5f));
+        gTestModels[1]->AddMesh(
+            new Renderer::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true),
+            new Renderer::Material(mapDirt, 0.3f, 4.0f));
+        gTestModels[1]->SetPosition(glm::vec3(1.0f, 2.0f, -2.5f));
         gTestModels[1]->SetScale(glm::vec3(0.65f));
 
-        gTestModels[2]->SetMaterial(new Renderer::Material(mapStainlessSteel, 2.0f, 128.0f));
+        gTestModels[2]->AddMesh(
+            new Renderer::Mesh(FLOOR_VERTICES, FLOOR_INDICES, 8, { 3, 2, 3 }, false),
+            new Renderer::Material(mapStainlessSteel, 2.0f, 128.0f));
         gTestModels[2]->SetPosition(glm::vec3(0.0f, -2.0f, 0.0f));
     }
 
@@ -313,26 +328,38 @@ bool loop()
     for (size_t i = 0; i < gTestModels.size(); ++i)
     {
         Renderer::Model* model = gTestModels[i];
-        Renderer::Material* material = model->GetMaterial();
 
         gTestShader->SetUniformMatrix4fv("model", glm::value_ptr(model->GetModelMatrix()));
 
-        if (material->GetBaseMap()->GetType() == Renderer::MapType::COLOUR)
-        {
-            gTestShader->SetUniform1i("material.useTexture", 0);
-            gTestShader->SetUniform3f("material.baseColour", material->GetBaseMap()->GetColour());
-        }
-        else
-        {
-            gTestShader->SetUniform1i("material.useTexture", 1);
-        }
+        std::vector<Renderer::Mesh*> meshes = model->GetMeshes();
+        std::vector<Renderer::Material*> materials = model->GetMaterials();
+        std::vector<size_t> meshToMaterial = model->GetMeshToMaterialIndices();
 
-        gTestShader->SetUniform1f("material.specularIntensity", material->GetSpecularIntensity());
-        gTestShader->SetUniform1f("material.shininess", material->GetShininess());
+        for (size_t meshIndex = 0; meshIndex < meshToMaterial.size(); ++meshIndex)
+        {
+            size_t materialIndex = meshToMaterial[meshIndex];
+            Renderer::Material* material = materials[materialIndex];
+            Renderer::Mesh* mesh = meshes[meshIndex];
 
-        model->Bind();
-        model->Draw();
-        model->Unbind();
+            if (material->GetBaseMap()->GetType() == Renderer::MapType::COLOUR)
+            {
+                gTestShader->SetUniform1i("material.useTexture", 0);
+                gTestShader->SetUniform3f("material.baseColour", material->GetBaseMap()->GetColour());
+            }
+            else
+            {
+                gTestShader->SetUniform1i("material.useTexture", 1);
+            }
+
+            gTestShader->SetUniform1f("material.specularIntensity", material->GetSpecularIntensity());
+            gTestShader->SetUniform1f("material.shininess", material->GetShininess());
+
+            material->Bind();
+            mesh->Bind();
+            mesh->Draw();
+            mesh->Unbind();
+            material->Unbind();
+        }
     }
 
     gWindow->SwapBuffers();

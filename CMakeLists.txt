@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.27)
 project(udemy-opengl LANGUAGES CXX)
 
+find_package(assimp)
 find_package(glew)
 find_package(glfw3)
 find_package(glm)
@@ -24,6 +25,7 @@ set(SOURCES
     src/Renderer/Camera.cpp
     src/Renderer/Map.cpp
     src/Renderer/Material.cpp
+    src/Renderer/Mesh.cpp
     src/Renderer/Model.cpp
     src/Util/File.cpp
     src/Util/GL.cpp
@@ -32,6 +34,7 @@ set(SOURCES
 
 set(HEADERS
     src/App/Window.h
+    src/Asset/Type/Model.h
     src/Asset/Type/Image.h
     src/Asset/Asset.h
     src/Asset/Manager.h
@@ -50,6 +53,7 @@ set(HEADERS
     src/Renderer/Camera.h
     src/Renderer/Map.h
     src/Renderer/Material.h
+    src/Renderer/Mesh.h
     src/Renderer/Model.h
     src/Util/File.h
     src/Util/GL.h
@@ -65,6 +69,7 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(${PROJECT_NAME} PRIVATE
+    assimp::assimp
     GLEW::GLEW
     glfw
     glm::glm

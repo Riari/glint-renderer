@@ -64,6 +64,8 @@ namespace Asset::Type
 
             Assimp::Importer importer;
             const std::string path = basePath + "/" + json.at("Path").get<std::string>();
+
+            // TODO: Where possible, these flags should probably be set dynamically based on the format being imported.
             const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_MakeLeftHanded | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices);
 
             if (!scene)

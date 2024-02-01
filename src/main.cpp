@@ -7,9 +7,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <spdlog/spdlog.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
 #include "App/Window.h"
 #include "Asset/Type/Image.h"
 #include "Asset/Type/Model.h"
@@ -26,6 +23,9 @@
 #include "Renderer/Mesh.h"
 #include "Renderer/Model.h"
 #include "Util/GL.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 bool init();
 bool loop();
@@ -194,28 +194,12 @@ bool init()
     {
         stbi_set_flip_vertically_on_load(true);
 
-        Asset::Loader imageLoader = [](const std::string& basePath, const nlohmann::json& json, std::unordered_map<std::string, Asset::Asset*>& assets) {
-            Asset::Type::Image* image = new Asset::Type::Image();
+        Asset::Manager::RegisterInitialiser(".jpg", Asset::Type::InitialiseImage);
+        Asset::Manager::RegisterInitialiser(".png", Asset::Type::InitialiseImage);
+        Asset::Manager::RegisterLoader("Image", Asset::Type::LoadImage);
+        Asset::Manager::RegisterLoader("Model", Asset::Type::ModelLoader::Load);
 
-            std::string path = basePath + "/" + json.at("Path").get<std::string>();
-            image->data = stbi_load(path.c_str(), &(image->width), &(image->height), &(image->channels), 0);
-
-            // TODO: Implement asset validation
-            if (!image->data) {
-                spdlog::error("Failed to load image '{}' from path '{}'", json.at("Name").get<std::string>(), path);
-                return;
-            }
-
-            assets.emplace(json.at("Name").get<std::string>(), std::move(image));
-        };
-        Asset::Manager::RegisterType("Image", imageLoader);
-
-        Asset::Loader modelLoader = [](const std::string& basePath, const nlohmann::json& json, std::unordered_map<std::string, Asset::Asset*>& assets) {
-            Asset::Type::Model* model = new Asset::Type::Model();
-
-            Assimp::Importer importer = Assimp::Importer();
-        };
-
+        Asset::Manager::Initialise();
         Asset::Manager::LoadAssets();
     }
 
@@ -224,22 +208,23 @@ bool init()
         gCamera = new Renderer::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 5.0f, 0.5f);
         gDirectionalLight = new Renderer::DirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.1f, glm::vec3(0.0f, 0.0f, -1.0f));
 
-        gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.0f, 0.5f), 0.0f, 1.0f, glm::vec3(0.0f, 0.5f, -3.0f), 0.3f, 0.1f, 0.1f));
-        gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.0f, 0.75f, 1.0f), 0.0f, 1.0f, glm::vec3(3.0f, 0.5f, 0.0f), 0.3f, 0.1f, 0.1f));
-        gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.42f, 0.0f), 0.0f, 1.0f, glm::vec3(-3.0f, 0.5f, 0.0f), 0.3f, 0.1f, 0.1f));
-        gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.47f, 0.0f, 1.0f), 0.0f, 1.0f, glm::vec3(0.0f, 0.5f, 3.0f), 0.3f, 0.1f, 0.1f));
+        // gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.0f, 0.5f), 0.0f, 1.0f, glm::vec3(0.0f, 0.5f, -3.0f), 0.3f, 0.1f, 0.1f));
+        // gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.0f, 0.75f, 1.0f), 0.0f, 1.0f, glm::vec3(3.0f, 0.5f, 0.0f), 0.3f, 0.1f, 0.1f));
+        // gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.42f, 0.0f), 0.0f, 1.0f, glm::vec3(-3.0f, 0.5f, 0.0f), 0.3f, 0.1f, 0.1f));
+        // gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.47f, 0.0f, 1.0f), 0.0f, 1.0f, glm::vec3(0.0f, 0.5f, 3.0f), 0.3f, 0.1f, 0.1f));
 
-        gSpotLights.push_back(new Renderer::SpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 2.0f, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, 0.1f, 0.1f, 20.0f));
+        gSpotLights.push_back(new Renderer::SpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 2.0f, glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, 0.1f, 0.1f, 40.0f));
 
+        gTestModels.push_back(new Renderer::Model());
         gTestModels.push_back(new Renderer::Model());
         gTestModels.push_back(new Renderer::Model());
         gTestModels.push_back(new Renderer::Model());
 
         glActiveTexture(GL_TEXTURE0);
 
-        auto mapBrick = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Brick"));
-        auto mapDirt = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Dirt"));
-        auto mapStainlessSteel = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("StainlessSteel"));
+        auto mapBrick = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Image::Brick"));
+        auto mapDirt = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Image::Dirt"));
+        auto mapStainlessSteel = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Image::StainlessSteel"));
 
         gTestModels[0]->AddMesh(
             new Renderer::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true),
@@ -257,6 +242,36 @@ bool init()
             new Renderer::Mesh(FLOOR_VERTICES, FLOOR_INDICES, 8, { 3, 2, 3 }, false),
             new Renderer::Material(mapStainlessSteel, 2.0f, 128.0f));
         gTestModels[2]->SetPosition(glm::vec3(0.0f, -2.0f, 0.0f));
+
+        // TODO: Define a better way of converting imported models and materials into renderer-ready models
+        const Asset::Type::Model& model = Asset::Manager::Get<Asset::Type::Model>("Model::F1Car");
+        for (size_t i = 0; i < model.mMaterials.size(); ++i)
+        {
+            Asset::Type::MaterialData* material = model.mMaterials[i];
+
+            if (!material->mHasTexture)
+            {
+                Renderer::Map* map = new Renderer::Map(glm::vec3(1.0f, 0.0f, 1.0f));
+                gTestModels[3]->AddMaterial(new Renderer::Material(map, material->mSpecularIntensity, material->mShininess));
+            }
+            else
+            {
+                const Asset::Type::Image& image = Asset::Manager::Get<Asset::Type::Image>(material->mTextureAssetName);
+                gTestModels[3]->AddMaterial(new Renderer::Material(new Renderer::Map(image), material->mSpecularIntensity, material->mShininess));
+            }
+        }
+
+        for (size_t i = 0; i < model.mMeshes.size(); ++i)
+        {
+            Asset::Type::MeshData* mesh = model.mMeshes[i];
+
+            gTestModels[3]->AddMesh(
+                new Renderer::Mesh(mesh->mVertices, mesh->mIndices, mesh->mVertexLength, mesh->mAttributeSizes, false),
+                mesh->mMaterialIndex);
+        }
+
+        gTestModels[3]->SetPosition(glm::vec3(0.0f, -2.0f, 0.0f));
+        gTestModels[3]->SetScale(glm::vec3(0.01f));
     }
 
     spdlog::info("Initialisation complete!");

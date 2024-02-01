@@ -37,6 +37,7 @@ set(HEADERS
     src/Asset/Type/Model.h
     src/Asset/Type/Image.h
     src/Asset/Asset.h
+    src/Asset/Constants.h
     src/Asset/Manager.h
     src/Renderer/GL/Buffer/BufferObject.h
     src/Renderer/GL/Buffer/EBO.h

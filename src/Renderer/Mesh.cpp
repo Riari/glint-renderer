@@ -4,10 +4,10 @@
 
 namespace Renderer
 {
-    Mesh::Mesh(std::vector<GLfloat> vertices, std::vector<GLuint> indices, unsigned int vertexLength, std::vector<unsigned int> attributeSizes, bool generateNormals)
+    Mesh::Mesh(std::vector<GLfloat> vertices, std::vector<GLuint> indices, unsigned int vertexLength, std::vector<unsigned int> vertexLayout, bool generateNormals)
         : mVertices(vertices)
         , mVertexLength(vertexLength)
-        , mAttributeSizes(attributeSizes)
+        , mVertexLayout(vertexLayout)
         , mIndices(indices)
     {
         if (generateNormals)
@@ -23,11 +23,11 @@ namespace Renderer
         mVBO.Write(sizeof(vertices[0]) * vertices.size(), &mVertices[0], GL_STATIC_DRAW);
 
         unsigned int prevAttributesSize = 0;
-        for (unsigned int i = 0; i < attributeSizes.size(); ++i)
+        for (unsigned int i = 0; i < vertexLayout.size(); ++i)
         {
-            mVAO.SetAttributePointer(i, attributeSizes[i], sizeof(vertices[0]) * vertexLength, (void*)(sizeof(vertices[0]) * prevAttributesSize));
+            mVAO.SetAttributePointer(i, vertexLayout[i], sizeof(vertices[0]) * vertexLength, (void*)(sizeof(vertices[0]) * prevAttributesSize));
             mVAO.EnableAttributePointer(i);
-            prevAttributesSize += attributeSizes[i];
+            prevAttributesSize += vertexLayout[i];
         }
 
         mEBO.Bind();
@@ -62,7 +62,7 @@ namespace Renderer
         unsigned int normalOffset{0};
         for (size_t i = 0; i < normalAttributeIndex; ++i)
         {
-            normalOffset += mAttributeSizes[i];
+            normalOffset += mVertexLayout[i];
         }
 
         for (size_t i = 0; i < mIndices.size(); i += 3)

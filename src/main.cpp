@@ -266,7 +266,7 @@ bool init()
             Asset::Type::MeshData* mesh = model.mMeshes[i];
 
             gTestModels[3]->AddMesh(
-                new Renderer::Mesh(mesh->mVertices, mesh->mIndices, mesh->mVertexLength, mesh->mAttributeSizes, false),
+                new Renderer::Mesh(mesh->mVertices, mesh->mIndices, mesh->mVertexLength, mesh->mVertexLayout, false),
                 mesh->mMaterialIndex);
         }
 

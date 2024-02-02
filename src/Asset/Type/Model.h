@@ -15,7 +15,7 @@ namespace Asset::Type
         std::vector<float> mVertices;
         std::vector<unsigned int> mIndices;
         unsigned int mVertexLength;
-        std::vector<unsigned int> mAttributeSizes;
+        std::vector<unsigned int> mVertexLayout;
         unsigned int mMaterialIndex;
     };
 
@@ -104,7 +104,7 @@ namespace Asset::Type
 
             // TODO: For now, these are hardcoded
             data->mVertexLength = 8;
-            data->mAttributeSizes = { 3, 2, 3 };
+            data->mVertexLayout = { 3, 2, 3 };
 
             for (size_t i = 0; i < mesh->mNumVertices; i++)
             {

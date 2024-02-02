@@ -23,7 +23,7 @@ namespace Renderer
     private:
         std::vector<GLfloat> mVertices;
         unsigned int mVertexLength;
-        std::vector<unsigned int> mAttributeSizes;
+        std::vector<unsigned int> mVertexLayout;
 
         std::vector<GLuint> mIndices;
 
@@ -32,7 +32,7 @@ namespace Renderer
         GL::EBO mEBO;
 
         /// @brief Generates normals based on the vertices and attribute information. CAUTION: overwrites existing normals!
-        /// @param normalAttributeIndex The index into mAttributeSizes corresponding to normal size.
+        /// @param normalAttributeIndex The index into mVertexLayout corresponding to normal size.
         void GenerateNormals(size_t normalAttributeIndex);
     };
 };

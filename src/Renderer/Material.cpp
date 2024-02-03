@@ -3,25 +3,40 @@
 namespace Renderer
 {
     Material::Material()
-        : Material(new Map(glm::vec3(1.0f, 1.0f, 1.0f)), 0.0f, 0.0f)
+        : Material(0.0f, 0.0f)
     {
     }
 
-    Material::Material(Map* baseMap, GLfloat specularIntensity, GLfloat shininess)
-        : mBaseMap(baseMap)
-        , mSpecularIntensity(specularIntensity)
+    Material::Material(GLfloat specularIntensity, GLfloat shininess)
+        : mSpecularIntensity(specularIntensity)
         , mShininess(shininess)
     {
     }
 
     Material::~Material()
     {
-        delete mBaseMap;
+        for (auto& map : mMaps)
+        {
+            delete map.second;
+        }
+        mMaps.clear();
     }
 
-    Map* Material::GetBaseMap() const
+    void Material::SetMap(Map* map)
     {
-        return mBaseMap;
+        // TODO: This should probably delete the old map if there is one
+        mMaps[map->GetTargetType()] = map;
+    }
+
+    Map* Material::GetMap(Asset::Type::MapTargetType targetType) const
+    {
+        auto it = mMaps.find(targetType);
+        if (it != mMaps.end())
+        {
+            return it->second;
+        }
+
+        return nullptr;
     }
 
     GLfloat Material::GetSpecularIntensity() const
@@ -36,11 +51,17 @@ namespace Renderer
 
     void Material::Bind() const
     {
-        mBaseMap->Bind();
+        for (auto& map : mMaps)
+        {
+            map.second->Bind();
+        }
     }
 
     void Material::Unbind() const
     {
-        mBaseMap->Unbind();
+        for (auto& map : mMaps)
+        {
+            map.second->Unbind();
+        }
     }
 };

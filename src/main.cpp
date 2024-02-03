@@ -53,10 +53,10 @@ const std::vector<GLuint> PYRAMID_INDICES = {
 };
 
 const std::vector<GLfloat> FLOOR_VERTICES = {
-    -10.0f, 0.0f, -10.0f,   0.0f, 0.0f,     0.0f, -1.0f, 0.0f,
-    10.0f, 0.0f, -10.0f,    10.0f, 0.0f,    0.0f, -1.0f, 0.0f,
-    -10.0f, 0.0f, 10.0f,    0.0f, 10.0f,    0.0f, -1.0f, 0.0f,
-    10.0f, 0.0f, 10.0f,     10.0f, 10.0f,   0.0f, -1.0f, 0.0f,
+    -10.0f, 0.0f, -10.0f,   0.0f, 0.0f,     0.0f, 1.0f, 0.0f,
+    10.0f, 0.0f, -10.0f,    10.0f, 0.0f,    0.0f, 1.0f, 0.0f,
+    -10.0f, 0.0f, 10.0f,    0.0f, 10.0f,    0.0f, 1.0f, 0.0f,
+    10.0f, 0.0f, 10.0f,     10.0f, 10.0f,   0.0f, 1.0f, 0.0f,
 };
 
 const std::vector<GLuint> FLOOR_INDICES = {
@@ -205,60 +205,77 @@ bool init()
 
     spdlog::info("Creating world objects");
     {
-        gCamera = new Renderer::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 5.0f, 0.5f);
-        gDirectionalLight = new Renderer::DirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.1f, glm::vec3(0.0f, 0.0f, -1.0f));
+        gCamera = new Renderer::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 1.0f, 0.3f);
+        gDirectionalLight = new Renderer::DirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.01f, 0.01f, glm::vec3(0.0f, 0.0f, -1.0f));
 
         // gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.0f, 0.5f), 0.0f, 1.0f, glm::vec3(0.0f, 0.5f, -3.0f), 0.3f, 0.1f, 0.1f));
         // gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.0f, 0.75f, 1.0f), 0.0f, 1.0f, glm::vec3(3.0f, 0.5f, 0.0f), 0.3f, 0.1f, 0.1f));
         // gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.42f, 0.0f), 0.0f, 1.0f, glm::vec3(-3.0f, 0.5f, 0.0f), 0.3f, 0.1f, 0.1f));
         // gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.47f, 0.0f, 1.0f), 0.0f, 1.0f, glm::vec3(0.0f, 0.5f, 3.0f), 0.3f, 0.1f, 0.1f));
 
-        gSpotLights.push_back(new Renderer::SpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 2.0f, glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, 0.1f, 0.1f, 40.0f));
+        gSpotLights.push_back(new Renderer::SpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.65f, 2.5f, glm::vec3(-2.0f, 2.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, 0.2f, 0.1f, 40.0f));
+        gSpotLights.push_back(new Renderer::SpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.65f, 2.5f, glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, 0.2f, 0.1f, 40.0f));
 
         gTestModels.push_back(new Renderer::Model());
         gTestModels.push_back(new Renderer::Model());
         gTestModels.push_back(new Renderer::Model());
         gTestModels.push_back(new Renderer::Model());
 
-        glActiveTexture(GL_TEXTURE0);
+        auto mapBrick = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Image::Brick"), Asset::Type::MapTargetType::DIFFUSE);
+        auto mapDirt = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Image::Dirt"), Asset::Type::MapTargetType::DIFFUSE);
+        auto mapStainlessSteel = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Image::StainlessSteel"), Asset::Type::MapTargetType::DIFFUSE);
 
-        auto mapBrick = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Image::Brick"));
-        auto mapDirt = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Image::Dirt"));
-        auto mapStainlessSteel = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>("Image::StainlessSteel"));
+        auto materialBrick = new Renderer::Material(1.0f, 32.0f);
+        materialBrick->SetMap(mapBrick);
+
+        auto materialDirt = new Renderer::Material(0.3f, 4.0f);
+        materialDirt->SetMap(mapDirt);
+
+        auto materialStainlessSteel = new Renderer::Material(2.0f, 128.0f);
+        materialStainlessSteel->SetMap(mapStainlessSteel);
+        materialStainlessSteel->SetMap(new Renderer::Map(glm::vec3(1.0f, 1.0f, 1.0f), Asset::Type::MapTargetType::SPECULAR));
 
         gTestModels[0]->AddMesh(
             new Renderer::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true),
-            new Renderer::Material(mapBrick, 1.0f, 32.0f));
+            materialBrick);
         gTestModels[0]->SetPosition(glm::vec3(-1.0f, 2.0f, -2.5f));
         gTestModels[0]->SetScale(glm::vec3(0.5f));
 
         gTestModels[1]->AddMesh(
             new Renderer::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true),
-            new Renderer::Material(mapDirt, 0.3f, 4.0f));
+            materialDirt);
         gTestModels[1]->SetPosition(glm::vec3(1.0f, 2.0f, -2.5f));
         gTestModels[1]->SetScale(glm::vec3(0.65f));
 
         gTestModels[2]->AddMesh(
             new Renderer::Mesh(FLOOR_VERTICES, FLOOR_INDICES, 8, { 3, 2, 3 }, false),
-            new Renderer::Material(mapStainlessSteel, 2.0f, 128.0f));
+            materialStainlessSteel);
         gTestModels[2]->SetPosition(glm::vec3(0.0f, -2.0f, 0.0f));
 
         // TODO: Define a better way of converting imported models and materials into renderer-ready models
         const Asset::Type::Model& model = Asset::Manager::Get<Asset::Type::Model>("Model::F1Car");
         for (size_t i = 0; i < model.mMaterials.size(); ++i)
         {
-            Asset::Type::MaterialData* material = model.mMaterials[i];
+            Asset::Type::MaterialData* materialData = model.mMaterials[i];
+            Renderer::Material* material = new Renderer::Material(materialData->mSpecularIntensity, materialData->mShininess);
 
-            if (!material->mHasTexture)
+            for (size_t j = 0; j < materialData->mMaps.size(); ++j)
             {
-                Renderer::Map* map = new Renderer::Map(glm::vec3(1.0f, 0.0f, 1.0f));
-                gTestModels[3]->AddMaterial(new Renderer::Material(map, material->mSpecularIntensity, material->mShininess));
+                Asset::Type::MapData* mapData = materialData->mMaps[j];
+
+                if (mapData->mSourceType == Asset::Type::MapSourceType::IMAGE)
+                {
+                    Renderer::Map* map = new Renderer::Map(Asset::Manager::Get<Asset::Type::Image>(mapData->mAssetName), mapData->mTargetType);
+                    material->SetMap(map);
+                }
+                else
+                {
+                    Renderer::Map* map = new Renderer::Map(mapData->mColour, mapData->mTargetType);
+                    material->SetMap(map);
+                }
             }
-            else
-            {
-                const Asset::Type::Image& image = Asset::Manager::Get<Asset::Type::Image>(material->mTextureAssetName);
-                gTestModels[3]->AddMaterial(new Renderer::Material(new Renderer::Map(image), material->mSpecularIntensity, material->mShininess));
-            }
+
+            gTestModels[3]->AddMaterial(material);
         }
 
         for (size_t i = 0; i < model.mMeshes.size(); ++i)
@@ -292,7 +309,7 @@ bool loop()
     glm::mat4 projection = glm::perspective(45.0f, (float)gWindow->GetWidth() / (float)gWindow->GetHeight(), 0.1f, 100.0f);
 
     // Draw
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     gCamera->Update(gWindow, static_cast<float>(gDeltaTime));
@@ -356,14 +373,34 @@ bool loop()
             Renderer::Material* material = materials[materialIndex];
             Renderer::Mesh* mesh = meshes[meshIndex];
 
-            if (material->GetBaseMap()->GetType() == Renderer::MapType::COLOUR)
+            Renderer::Map* diffuseMap = material->GetMap(Asset::Type::MapTargetType::DIFFUSE);
+            if (diffuseMap != nullptr)
             {
-                gTestShader->SetUniform1i("material.useTexture", 0);
-                gTestShader->SetUniform3f("material.baseColour", material->GetBaseMap()->GetColour());
+                if (diffuseMap->GetSourceType() == Asset::Type::MapSourceType::COLOUR)
+                {
+                    gTestShader->SetUniform1i("material.useDiffuseTexture", 0);
+                    gTestShader->SetUniform3f("material.diffuseColour", diffuseMap->GetColour());
+                }
+                else
+                {
+                    gTestShader->SetUniform1i("material.useDiffuseTexture", 1);
+                    gTestShader->SetUniform1i("material.diffuseTexture", diffuseMap->GetTextureUnit());
+                }
             }
-            else
+
+            Renderer::Map* specularMap = material->GetMap(Asset::Type::MapTargetType::SPECULAR);
+            if (specularMap != nullptr)
             {
-                gTestShader->SetUniform1i("material.useTexture", 1);
+                if (specularMap->GetSourceType() == Asset::Type::MapSourceType::COLOUR)
+                {
+                    gTestShader->SetUniform1i("material.useSpecularTexture", 0);
+                    gTestShader->SetUniform3f("material.specularColour", specularMap->GetColour());
+                }
+                else
+                {
+                    gTestShader->SetUniform1i("material.useSpecularTexture", 1);
+                    gTestShader->SetUniform1i("material.specularTexture", specularMap->GetTextureUnit());
+                }
             }
 
             gTestShader->SetUniform1f("material.specularIntensity", material->GetSpecularIntensity());

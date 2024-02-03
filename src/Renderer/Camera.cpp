@@ -31,7 +31,12 @@ namespace Renderer
 
     void Camera::Update(App::Window* pWindow, float deltaTime)
     {
-        float velocity = mMoveSpeed * static_cast<float>(deltaTime);
+        float velocity = mMoveSpeed * deltaTime;
+
+        if (pWindow->IsKeyPressed(GLFW_KEY_LEFT_SHIFT))
+        {
+            velocity += 2.0f * deltaTime;
+        }
 
         if (pWindow->IsKeyPressed(GLFW_KEY_W))
         {

@@ -6,7 +6,9 @@
 
 using namespace Renderer::GL;
 
-Texture::Texture(const Asset::Type::Image& image) : Object()
+Texture::Texture(const Asset::Type::Image& image, GLenum unit)
+    : Object()
+    , mUnit(unit)
 {
     glGenTextures(1, &mId);
 
@@ -37,6 +39,7 @@ void Texture::Bind()
 {
     if (mIsBound) return;
 
+    glActiveTexture(GL_TEXTURE0 + mUnit);
     glBindTexture(GL_TEXTURE_2D, mId);
     mIsBound = true;
 }

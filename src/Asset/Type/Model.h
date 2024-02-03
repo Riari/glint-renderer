@@ -3,6 +3,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <glm/glm.hpp>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
@@ -19,12 +20,40 @@ namespace Asset::Type
         unsigned int mMaterialIndex;
     };
 
+    enum MapSourceType
+    {
+        IMAGE,
+        COLOUR,
+    };
+
+    enum MapTargetType
+    {
+        DIFFUSE,
+        SPECULAR,
+    };
+
+    struct MapData
+    {
+        MapSourceType mSourceType;
+        MapTargetType mTargetType;
+        std::string mAssetName;
+        glm::vec3 mColour;
+    };
+
     struct MaterialData
     {
-        bool mHasTexture;
-        std::string mTextureAssetName;
+        std::vector<MapData*> mMaps;
         float mSpecularIntensity;
         float mShininess;
+
+        ~MaterialData()
+        {
+            for (auto& map : mMaps)
+            {
+                delete map;
+            }
+            mMaps.clear();
+        }
     };
 
     struct Model : public Asset
@@ -117,7 +146,7 @@ namespace Asset::Type
                 {
                     data->mVertices.insert(data->mVertices.end(), { 0.0f, 0.0f });
                 }
-                data->mVertices.insert(data->mVertices.end(), { -mesh->mNormals[i].x, -mesh->mNormals[i].y, -mesh->mNormals[i].z });
+                data->mVertices.insert(data->mVertices.end(), { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z });
             }
 
             for (size_t i = 0; i < mesh->mNumFaces; i++)
@@ -146,8 +175,9 @@ namespace Asset::Type
             {
                 aiMaterial* material = scene->mMaterials[i];
 
-                materials[i] = nullptr;
+                materials[i] = new MaterialData{{}, defaultSpecularIntensity, defaultShininess};
 
+                // TODO: Reduce code duplication
                 if (material->GetTextureCount(aiTextureType_DIFFUSE))
                 {
                     aiString path;
@@ -159,12 +189,35 @@ namespace Asset::Type
                         // when there's a proper pipeline for materials as distinct asset types.
                         std::string imageAssetName = "Image::" + std::string(path.data).substr(idx + 1);
                         imageAssetName = imageAssetName.substr(0, imageAssetName.find_last_of("."));
-                        materials[i] = new MaterialData{true, imageAssetName, defaultSpecularIntensity, defaultShininess};
+                        materials[i]->mMaps.push_back(new MapData{ MapSourceType::IMAGE, MapTargetType::DIFFUSE, imageAssetName });
                     }
                 }
                 else
                 {
-                    materials[i] = new MaterialData{false, "", defaultSpecularIntensity, defaultShininess};
+                    aiColor3D diffuseColour;
+                    material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColour);
+                    materials[i]->mMaps.push_back(new MapData{ MapSourceType::COLOUR, MapTargetType::DIFFUSE, "", glm::vec3(diffuseColour.r, diffuseColour.g, diffuseColour.b) });
+                }
+
+                if (material->GetTextureCount(aiTextureType_SPECULAR))
+                {
+                    aiString path;
+                    if (material->GetTexture(aiTextureType_SPECULAR, 0, &path) == AI_SUCCESS)
+                    {
+                        int idx = std::string(path.data).rfind("\\");
+
+                        // TODO: Replace this workaround for referencing the image assets to use as textures
+                        // when there's a proper pipeline for materials as distinct asset types.
+                        std::string imageAssetName = "Image::" + std::string(path.data).substr(idx + 1);
+                        imageAssetName = imageAssetName.substr(0, imageAssetName.find_last_of("."));
+                        materials[i]->mMaps.push_back(new MapData{ MapSourceType::IMAGE, MapTargetType::SPECULAR, imageAssetName });
+                    }
+                }
+                else
+                {
+                    aiColor3D specularColour;
+                    material->Get(AI_MATKEY_COLOR_SPECULAR, specularColour);
+                    materials[i]->mMaps.push_back(new MapData{ MapSourceType::COLOUR, MapTargetType::DIFFUSE, "", glm::vec3(specularColour.r, specularColour.g, specularColour.b) });
                 }
             }
 

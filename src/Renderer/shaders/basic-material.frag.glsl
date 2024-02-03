@@ -40,8 +40,14 @@ struct SpotLight
 
 struct Material
 {
-    bool useTexture;
-    vec3 baseColour;
+    bool useDiffuseTexture;
+    sampler2D diffuseTexture;
+    vec3 diffuseColour;
+
+    bool useSpecularTexture;
+    sampler2D specularTexture;
+    vec3 specularColour;
+
     float specularIntensity;
     float shininess;
 };
@@ -52,7 +58,6 @@ uniform int pointLightCount;
 uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
 uniform int spotLightCount;
 
-uniform sampler2D textureSampler;
 uniform Material material;
 
 uniform vec3 eyePosition;
@@ -61,7 +66,7 @@ vec4 CalcLightByDirection(Light light, vec3 direction)
 {
     vec4 ambientColour = vec4(light.colour, 1.0f) * light.ambientIntensity;
 
-    float diffuseFactor = max(dot(normalize(vertexNormal), normalize(direction)), 0.0f);
+    float diffuseFactor = max(dot(-normalize(vertexNormal), normalize(direction)), 0.0f);
     vec4 diffuseColour = vec4(light.colour * light.diffuseIntensity * diffuseFactor, 1.0f);
 
     vec4 specularColour = vec4(0);
@@ -69,13 +74,18 @@ vec4 CalcLightByDirection(Light light, vec3 direction)
     if (diffuseFactor > 0.0f)
     {
         vec3 fragToEye = normalize(eyePosition - vertexFragPosition);
-        vec3 reflectedVertex = normalize(reflect(direction, normalize(vertexNormal)));
+        vec3 reflectedVertex = normalize(reflect(direction, -normalize(vertexNormal)));
 
         float specularFactor = dot(fragToEye, reflectedVertex);
         if (specularFactor > 0.0f)
         {
             specularFactor = pow(specularFactor, material.shininess);
-            specularColour = vec4(light.colour * material.specularIntensity * specularFactor, 1.0f);
+
+            vec3 specularBase = material.useSpecularTexture
+                ? texture(material.specularTexture, vertexUV).rgb
+                : material.specularColour;
+
+            specularColour = vec4(light.colour * specularBase * material.specularIntensity * specularFactor, 1.0f);
         }
     }
 
@@ -115,7 +125,6 @@ vec4 CalcSpotLight(SpotLight spotLight)
     if (factor > spotLight.edgeCosine)
     {
         vec4 colour = CalcPointLight(spotLight.base);
-
         return colour * (1.0f - (1.0f - factor) * (1.0f / (1.0f - spotLight.edgeCosine)));
     }
 
@@ -139,12 +148,7 @@ void main()
     finalColour += CalcPointLights();
     finalColour += CalcSpotLights();
 
-    if (material.useTexture)
-    {
-        colour = texture(textureSampler, vertexUV) * finalColour;
-    }
-    else
-    {
-        colour = vec4(material.baseColour, 1.0f) * finalColour;
-    }
+    colour = material.useDiffuseTexture
+        ? texture(material.diffuseTexture, vertexUV) * finalColour
+        : vec4(material.diffuseColour, 1.0f) * finalColour;
 }

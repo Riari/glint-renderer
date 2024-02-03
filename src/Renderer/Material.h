@@ -6,14 +6,19 @@
 
 namespace Renderer
 {
+    // TODO: Validate materials. They should have at least a diffuse map.
     class Material
     {
     public:
         Material();
-        Material(Map* baseMap, GLfloat specularIntensity, GLfloat shininess);
+        Material(GLfloat specularIntensity, GLfloat shininess);
         ~Material();
 
-        Map* GetBaseMap() const;
+        /// @brief Sets the provided map according to its target type.
+        /// CAUTION: This will replace any existing map with the same target type!
+        void SetMap(Map* map);
+
+        Map* GetMap(Asset::Type::MapTargetType targetType) const;
         GLfloat GetSpecularIntensity() const;
         GLfloat GetShininess() const;
 
@@ -21,7 +26,7 @@ namespace Renderer
         void Unbind() const;
 
     private:
-        Map* mBaseMap;
+        std::unordered_map<Asset::Type::MapTargetType, Map*> mMaps;
 
         GLfloat mSpecularIntensity;
         GLfloat mShininess;

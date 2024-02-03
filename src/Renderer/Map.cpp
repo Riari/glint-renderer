@@ -2,29 +2,46 @@
 
 namespace Renderer
 {
-    Map::Map(glm::vec3 colour)
-        : mType(MapType::COLOUR)
+    Map::Map(glm::vec3 colour, Asset::Type::MapTargetType targetType)
+        : mSourceType(Asset::Type::MapSourceType::COLOUR)
+        , mTargetType(targetType)
         , mColour(colour)
     {
     }
 
-    Map::Map(const Asset::Type::Image& image)
-        : mType(MapType::TEXTURE)
-        , mTexture(new GL::Texture(image))
+    Map::Map(const Asset::Type::Image& image, Asset::Type::MapTargetType targetType)
+        : mSourceType(Asset::Type::MapSourceType::IMAGE)
+        , mTargetType(targetType)
     {
+        switch (mTargetType)
+        {
+            case Asset::Type::MapTargetType::DIFFUSE:
+                mTextureUnit = 0;
+                break;
+            case Asset::Type::MapTargetType::SPECULAR:
+                mTextureUnit = 1;
+                break;
+        }
+
+        mTexture = new GL::Texture(image, mTextureUnit);
     }
 
     Map::~Map()
     {
-        if (mType == MapType::TEXTURE)
+        if (mSourceType == Asset::Type::MapSourceType::IMAGE)
         {
             delete mTexture;
         }
     }
 
-    MapType Map::GetType() const
+    Asset::Type::MapSourceType Map::GetSourceType() const
     {
-        return mType;
+        return mSourceType;
+    }
+
+    Asset::Type::MapTargetType Map::GetTargetType() const
+    {
+        return mTargetType;
     }
 
     glm::vec3 Map::GetColour() const
@@ -37,16 +54,21 @@ namespace Renderer
         return mTexture;
     }
 
+    GLuint Map::GetTextureUnit() const
+    {
+        return mTextureUnit;
+    }
+
     void Map::Bind() const
     {
-        if (mType != MapType::TEXTURE) return;
+        if (mSourceType != Asset::Type::MapSourceType::IMAGE) return;
 
         mTexture->Bind();
     }
 
     void Map::Unbind() const
     {
-        if (mType != MapType::TEXTURE) return;
+        if (mSourceType != Asset::Type::MapSourceType::IMAGE) return;
 
         mTexture->Unbind();
     }

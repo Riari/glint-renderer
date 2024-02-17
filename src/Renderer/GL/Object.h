@@ -10,8 +10,8 @@ namespace Renderer::GL
         Object() {}
         Object(GLuint id);
 
-        GLuint GetID() { return mId; }
-        bool IsBound() { return mIsBound; }
+        GLuint GetID() const { return mId; }
+        bool IsBound() const { return mIsBound; }
 
     protected:
         GLuint mId;

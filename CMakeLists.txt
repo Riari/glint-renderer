@@ -12,6 +12,7 @@ set(SOURCES
     src/App/Window.cpp
     src/Renderer/GL/Buffer/BufferObject.cpp
     src/Renderer/GL/Buffer/EBO.cpp
+    src/Renderer/GL/Buffer/FBO.cpp
     src/Renderer/GL/Buffer/VAO.cpp
     src/Renderer/GL/Buffer/VBO.cpp
     src/Renderer/GL/Object.cpp
@@ -27,6 +28,7 @@ set(SOURCES
     src/Renderer/Material.cpp
     src/Renderer/Mesh.cpp
     src/Renderer/Model.cpp
+    src/Renderer/ShadowMap.cpp
     src/Util/File.cpp
     src/Util/GL.cpp
     src/main.cpp
@@ -41,6 +43,7 @@ set(HEADERS
     src/Asset/Manager.h
     src/Renderer/GL/Buffer/BufferObject.h
     src/Renderer/GL/Buffer/EBO.h
+    src/Renderer/GL/Buffer/FBO.h
     src/Renderer/GL/Buffer/VAO.h
     src/Renderer/GL/Buffer/VBO.h
     src/Renderer/GL/Object.h
@@ -56,6 +59,7 @@ set(HEADERS
     src/Renderer/Material.h
     src/Renderer/Mesh.h
     src/Renderer/Model.h
+    src/Renderer/ShadowMap.h
     src/Util/File.h
     src/Util/GL.h
     src/Util/Random.h

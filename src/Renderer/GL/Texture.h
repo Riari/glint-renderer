@@ -11,14 +11,17 @@ namespace Renderer::GL
     {
     public:
         Texture(const Asset::Type::Image& image, GLenum unit);
+        Texture(GLenum unit);
         ~Texture();
 
         void Bind();
         void Unbind();
 
+        void Generate(GLint width, GLint height, GLint format, const void* data) const;
+
     private:
         GLenum mUnit;
 
-        void GenerateFromImage(const Asset::Type::Image& image);
+        void GenerateFromImage(const Asset::Type::Image& image) const;
     };
 };

@@ -13,6 +13,11 @@ namespace Renderer
 
         bool Init();
 
+        void BindFramebuffer();
+        void UnbindFramebuffer();
+
+        int GetWidth() const;
+        int GetHeight() const;
         GL::Texture* GetMap() const;
 
     private:

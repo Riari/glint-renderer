@@ -11,16 +11,12 @@ VAO::VAO() : Object()
 
 void VAO::Bind()
 {
-    if (mIsBound) return;
-
     glBindVertexArray(mId);
     mIsBound = true;
 }
 
 void VAO::Unbind()
 {
-    if (!mIsBound) return;
-
     glBindVertexArray(0);
     mIsBound = false;
 }

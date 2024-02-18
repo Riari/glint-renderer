@@ -15,19 +15,19 @@ namespace Renderer::GL
         glDeleteFramebuffers(1, &mId);
     }
 
-    void FBO::Bind() const
+    void FBO::Bind()
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, mId);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mId);
     }
 
-    void FBO::Unbind() const
+    void FBO::Unbind()
     {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     void FBO::AttachTexture(const GL::Texture& texture, const GLenum attachment) const
     {
-        glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture.GetID(), 0);
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture.GetID(), 0);
     }
 
     void FBO::SetDrawMode(GLenum mode) const
@@ -42,8 +42,6 @@ namespace Renderer::GL
 
     bool FBO::GetIsValid() const
     {
-        assert(("FBO must be bound before checking if it's valid", mIsBound));
-
         return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
     }
 }

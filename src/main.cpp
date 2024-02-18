@@ -12,7 +12,7 @@
 #include "Asset/Type/Model.h"
 #include "Asset/Asset.h"
 #include "Asset/Manager.h"
-#include "Renderer/GL/ShaderProgram.h"
+#include "Renderer/GL/Shader/Program.h"
 #include "Renderer/Light/DirectionalLight.h"
 #include "Renderer/Light/Light.h"
 #include "Renderer/Light/PointLight.h"
@@ -35,7 +35,12 @@ Renderer::Camera* gCamera;
 Renderer::DirectionalLight* gDirectionalLight;
 std::vector<Renderer::PointLight*> gPointLights;
 std::vector<Renderer::SpotLight*> gSpotLights;
-Renderer::GL::ShaderProgram* gTestShader;
+Renderer::GL::Shader::Program* gBasicShader;
+Renderer::GL::Shader::Program* gDirectionalShadowMapShader;
+Renderer::GL::Shader::Program* gDebugQuadShader;
+
+const int WINDOW_WIDTH{1920};
+const int WINDOW_HEIGHT{1080};
 
 const std::vector<GLfloat> PYRAMID_VERTICES = {
     // X, Y, Z,             U, V,           NX, NY, NZ
@@ -64,7 +69,20 @@ const std::vector<GLuint> FLOOR_INDICES = {
     1, 2, 3,
 };
 
+const std::vector<GLfloat> QUAD_VERTICES = {
+    -1.0f, -1.0f,
+     1.0f, -1.0f,
+    -1.0f,  1.0f,
+     1.0f,  1.0f,
+};
+
+const std::vector<GLuint> QUAD_INDICES = {
+    0, 1, 2,
+    2, 1, 3,
+};
+
 std::vector<Renderer::Model*> gTestModels;
+Renderer::Model* gDebugQuad;
 
 int gFramesPerSecond;
 double gDeltaTime;
@@ -117,13 +135,17 @@ int main()
     }
     gSpotLights.clear();
 
-    delete gTestShader;
+    delete gBasicShader;
+    delete gDirectionalShadowMapShader;
+    delete gDebugQuadShader;
 
     for (auto model : gTestModels)
     {
         delete model;
     }
     gTestModels.clear();
+
+    delete gDebugQuad;
 
     glfwTerminate();
 
@@ -147,7 +169,7 @@ bool init()
     }
 
     {
-        gWindow = new App::Window(1920, 1080, "udemy-opengl");
+        gWindow = new App::Window(WINDOW_WIDTH, WINDOW_HEIGHT, "udemy-opengl");
         gWindow->MakeCurrent();
     }
 
@@ -178,16 +200,31 @@ bool init()
 
     spdlog::info("Building shaders");
     {
-        std::string vertSource = Util::File::Read("shaders/basic-material.vert.glsl");
-        std::string fragSource = Util::File::Read("shaders/basic-material.frag.glsl");
-        gTestShader = new Renderer::GL::ShaderProgram();
-        if (gTestShader->Build(vertSource, fragSource) != 0)
+        gBasicShader = new Renderer::GL::Shader::Program();
+        gBasicShader->AddShader(GL_VERTEX_SHADER, Util::File::Read("shaders/basic-material.vert.glsl"));
+        gBasicShader->AddShader(GL_FRAGMENT_SHADER, Util::File::Read("shaders/basic-material.frag.glsl"));
+        if (gBasicShader->Link() != 0)
         {
             glfwTerminate();
             return false;
         }
 
-        gTestShader->Use();
+        gDirectionalShadowMapShader = new Renderer::GL::Shader::Program();
+        gDirectionalShadowMapShader->AddShader(GL_VERTEX_SHADER, Util::File::Read("shaders/directional-shadow-map.vert.glsl"));
+        if (gDirectionalShadowMapShader->Link() != 0)
+        {
+            glfwTerminate();
+            return false;
+        }
+
+        gDebugQuadShader = new Renderer::GL::Shader::Program();
+        gDebugQuadShader->AddShader(GL_VERTEX_SHADER, Util::File::Read("shaders/debug-quad.vert.glsl"));
+        gDebugQuadShader->AddShader(GL_FRAGMENT_SHADER, Util::File::Read("shaders/debug-quad.frag.glsl"));
+        if (gDebugQuadShader->Link() != 0)
+        {
+            glfwTerminate();
+            return false;
+        }
     }
 
     spdlog::info("Registering assets");
@@ -206,15 +243,15 @@ bool init()
     spdlog::info("Creating world objects");
     {
         gCamera = new Renderer::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 1.0f, 0.3f);
-        gDirectionalLight = new Renderer::DirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.01f, 0.01f, glm::vec3(0.0f, 0.0f, -1.0f));
+        gDirectionalLight = new Renderer::DirectionalLight(2048, 2048, glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f, glm::vec3(0.0f, -15.0f, -10.0f));
 
         // gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.0f, 0.5f), 0.0f, 1.0f, glm::vec3(0.0f, 0.5f, -3.0f), 0.3f, 0.1f, 0.1f));
         // gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.0f, 0.75f, 1.0f), 0.0f, 1.0f, glm::vec3(3.0f, 0.5f, 0.0f), 0.3f, 0.1f, 0.1f));
         // gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.42f, 0.0f), 0.0f, 1.0f, glm::vec3(-3.0f, 0.5f, 0.0f), 0.3f, 0.1f, 0.1f));
         // gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.47f, 0.0f, 1.0f), 0.0f, 1.0f, glm::vec3(0.0f, 0.5f, 3.0f), 0.3f, 0.1f, 0.1f));
 
-        gSpotLights.push_back(new Renderer::SpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.65f, 2.5f, glm::vec3(-2.0f, 2.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, 0.2f, 0.1f, 40.0f));
-        gSpotLights.push_back(new Renderer::SpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.65f, 2.5f, glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, 0.2f, 0.1f, 40.0f));
+        gSpotLights.push_back(new Renderer::SpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.35f, 2.5f, glm::vec3(-2.0f, 2.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, 0.2f, 0.1f, 40.0f));
+        gSpotLights.push_back(new Renderer::SpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.35f, 2.5f, glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, 0.2f, 0.1f, 40.0f));
 
         gTestModels.push_back(new Renderer::Model());
         gTestModels.push_back(new Renderer::Model());
@@ -287,13 +324,86 @@ bool init()
                 mesh->mMaterialIndex);
         }
 
-        gTestModels[3]->SetPosition(glm::vec3(0.0f, -2.0f, 0.0f));
+        gTestModels[3]->SetPosition(glm::vec3(0.0f, -1.0f, 0.0f));
         gTestModels[3]->SetScale(glm::vec3(0.01f));
     }
+
+    gDebugQuad = new Renderer::Model();
+    gDebugQuad->AddMesh(
+        new Renderer::Mesh(QUAD_VERTICES, QUAD_INDICES, 2, { 2 }, false),
+        new Renderer::Material(0.0f, 0.0f));
 
     spdlog::info("Initialisation complete!");
 
     return true;
+}
+
+void DrawModel(Renderer::GL::Shader::Program* shaderProgram, const Renderer::Model* model, bool withMaterials)
+{
+    shaderProgram->SetUniformMatrix4fv("model", glm::value_ptr(model->GetModelMatrix()));
+
+    std::vector<Renderer::Mesh*> meshes = model->GetMeshes();
+    std::vector<Renderer::Material*> materials = model->GetMaterials();
+    std::vector<size_t> meshToMaterial = model->GetMeshToMaterialIndices();
+
+    for (size_t meshIndex = 0; meshIndex < meshToMaterial.size(); ++meshIndex)
+    {
+        size_t materialIndex = meshToMaterial[meshIndex];
+        Renderer::Material* material = materials[materialIndex];
+        Renderer::Mesh* mesh = meshes[meshIndex];
+
+        if (withMaterials)
+        {
+            Renderer::Map* diffuseMap = material->GetMap(Asset::Type::MapTargetType::DIFFUSE);
+            if (diffuseMap != nullptr)
+            {
+                if (diffuseMap->GetSourceType() == Asset::Type::MapSourceType::COLOUR)
+                {
+                    shaderProgram->SetUniform1i("material.useDiffuseTexture", 0);
+                    shaderProgram->SetUniform3f("material.diffuseColour", diffuseMap->GetColour());
+                }
+                else
+                {
+                    shaderProgram->SetUniform1i("material.useDiffuseTexture", 1);
+                    shaderProgram->SetUniform1i("material.diffuseTexture", diffuseMap->GetTextureUnit());
+                }
+            }
+
+            Renderer::Map* specularMap = material->GetMap(Asset::Type::MapTargetType::SPECULAR);
+            if (specularMap != nullptr)
+            {
+                if (specularMap->GetSourceType() == Asset::Type::MapSourceType::COLOUR)
+                {
+                    shaderProgram->SetUniform1i("material.useSpecularTexture", 0);
+                    shaderProgram->SetUniform3f("material.specularColour", specularMap->GetColour());
+                }
+                else
+                {
+                    shaderProgram->SetUniform1i("material.useSpecularTexture", 1);
+                    shaderProgram->SetUniform1i("material.specularTexture", specularMap->GetTextureUnit());
+                }
+            }
+
+            shaderProgram->SetUniform1f("material.specularIntensity", material->GetSpecularIntensity());
+            shaderProgram->SetUniform1f("material.shininess", material->GetShininess());
+        }
+
+        material->Bind();
+        mesh->Bind();
+        mesh->Draw();
+        mesh->Unbind();
+        material->Unbind();
+    }
+}
+
+void DrawModels(Renderer::GL::Shader::Program* shaderProgram, bool withMaterials)
+{
+    shaderProgram->Use();
+
+    for (size_t i = 0; i < gTestModels.size(); ++i)
+    {
+        DrawModel(shaderProgram, gTestModels[i], withMaterials);
+    }
 }
 
 bool loop()
@@ -303,115 +413,99 @@ bool loop()
         return false;
     }
 
-    // Update
     glfwPollEvents();
 
     glm::mat4 projection = glm::perspective(45.0f, (float)gWindow->GetWidth() / (float)gWindow->GetHeight(), 0.1f, 100.0f);
-
-    // Draw
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     gCamera->Update(gWindow, static_cast<float>(gDeltaTime));
 
     // TODO: Come up with a better way of managing the interface between world objects (e.g. lights) and shader programs
     // TODO: Validate shader inputs (e.g. point light count must not exceed MAX_POINT_LIGHTS)
+    // TODO: Encapsulate render passes
 
-    gTestShader->Use();
-    glm::mat4 view = gCamera->GetViewMatrix();
-    gTestShader->SetUniformMatrix4fv("view", glm::value_ptr(view));
-    gTestShader->SetUniformMatrix4fv("projection", glm::value_ptr(projection));
-    gTestShader->SetUniform3f("directionalLight.base.colour", gDirectionalLight->GetColour());
-    gTestShader->SetUniform1f("directionalLight.base.ambientIntensity", gDirectionalLight->GetAmbientIntensity());
-    gTestShader->SetUniform1f("directionalLight.base.diffuseIntensity", gDirectionalLight->GetDiffuseIntensity());
-    gTestShader->SetUniform3f("directionalLight.direction", gDirectionalLight->GetDirection());
-    gTestShader->SetUniform3f("eyePosition", gCamera->GetPosition());
 
-    gTestShader->SetUniform1i("pointLightCount", gPointLights.size());
-
-    for (size_t i = 0; i < gPointLights.size(); ++i)
+    // Render pass: shadow maps
     {
-        std::string light = "pointLights[" + std::to_string(i) + "]";
-        gTestShader->SetUniform3f(light + ".base.colour", gPointLights[i]->GetColour());
-        gTestShader->SetUniform1f(light + ".base.ambientIntensity", gPointLights[i]->GetAmbientIntensity());
-        gTestShader->SetUniform1f(light + ".base.diffuseIntensity", gPointLights[i]->GetDiffuseIntensity());
-        gTestShader->SetUniform3f(light + ".position", gPointLights[i]->GetPosition());
-        gTestShader->SetUniform1f(light + ".constant", gPointLights[i]->GetConstant());
-        gTestShader->SetUniform1f(light + ".linear", gPointLights[i]->GetLinear());
-        gTestShader->SetUniform1f(light + ".exponent", gPointLights[i]->GetExponent());
+        gDirectionalShadowMapShader->Use();
+
+        Renderer::ShadowMap* shadowMap = gDirectionalLight->GetShadowMap();
+        glViewport(0, 0, shadowMap->GetWidth(), shadowMap->GetHeight());
+
+        shadowMap->BindFramebuffer();
+	    glClear(GL_DEPTH_BUFFER_BIT);
+
+        glm::mat4 directionalLightTransform = gDirectionalLight->CalculateLightTransform();
+        gDirectionalShadowMapShader->SetUniformMatrix4fv("directionalLightTransform", glm::value_ptr(directionalLightTransform));
+
+        DrawModels(gDirectionalShadowMapShader, false);
+
+        shadowMap->UnbindFramebuffer();
     }
 
-    gTestShader->SetUniform1i("spotLightCount", gSpotLights.size());
-
-    for (size_t i = 0; i < gSpotLights.size(); ++i)
+    // Render pass: visualize directional shadow depth buffer
     {
-        std::string light = "spotLights[" + std::to_string(i) + "]";
-        gTestShader->SetUniform3f(light + ".base.base.colour", gSpotLights[i]->GetColour());
-        gTestShader->SetUniform1f(light + ".base.base.ambientIntensity", gSpotLights[i]->GetAmbientIntensity());
-        gTestShader->SetUniform1f(light + ".base.base.diffuseIntensity", gSpotLights[i]->GetDiffuseIntensity());
-        gTestShader->SetUniform3f(light + ".base.position", gSpotLights[i]->GetPosition());
-        gTestShader->SetUniform1f(light + ".base.constant", gSpotLights[i]->GetConstant());
-        gTestShader->SetUniform1f(light + ".base.linear", gSpotLights[i]->GetLinear());
-        gTestShader->SetUniform1f(light + ".base.exponent", gSpotLights[i]->GetExponent());
-        gTestShader->SetUniform3f(light + ".direction", gSpotLights[i]->GetDirection());
-        gTestShader->SetUniform1f(light + ".edgeCosine", gSpotLights[i]->GetEdgeCosine());
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        gDirectionalLight->GetShadowMap()->GetMap()->Bind();
+        gDebugQuadShader->Use();
+        gDebugQuadShader->SetUniform1i("textureSampler", gDirectionalLight->GetShadowMap()->GetMap()->GetUnit());
+        DrawModel(gDebugQuadShader, gDebugQuad, false);
     }
 
-    for (size_t i = 0; i < gTestModels.size(); ++i)
+    // Render pass: scene
     {
-        Renderer::Model* model = gTestModels[i];
+        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+        // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        // glClear(GL_COLOR_BUFFER_BIT);
 
-        gTestShader->SetUniformMatrix4fv("model", glm::value_ptr(model->GetModelMatrix()));
+        // gDirectionalLight->GetShadowMap()->GetMap()->Bind();
 
-        std::vector<Renderer::Mesh*> meshes = model->GetMeshes();
-        std::vector<Renderer::Material*> materials = model->GetMaterials();
-        std::vector<size_t> meshToMaterial = model->GetMeshToMaterialIndices();
+        // gBasicShader->Use();
+        // glm::mat4 view = gCamera->GetViewMatrix();
+        // gBasicShader->SetUniformMatrix4fv("view", glm::value_ptr(view));
+        // gBasicShader->SetUniformMatrix4fv("projection", glm::value_ptr(projection));
+        // gBasicShader->SetUniform3f("directionalLight.base.colour", gDirectionalLight->GetColour());
+        // gBasicShader->SetUniform1f("directionalLight.base.ambientIntensity", gDirectionalLight->GetAmbientIntensity());
+        // gBasicShader->SetUniform1f("directionalLight.base.diffuseIntensity", gDirectionalLight->GetDiffuseIntensity());
+        // gBasicShader->SetUniform3f("directionalLight.direction", gDirectionalLight->GetDirection());
+        // gBasicShader->SetUniform1i("directionalShadowMap", gDirectionalLight->GetShadowMap()->GetMap()->GetUnit());
+        // glm::mat4 directionalLightTransform = gDirectionalLight->CalculateLightTransform();
+        // gBasicShader->SetUniformMatrix4fv("directionalLightTransform", glm::value_ptr(directionalLightTransform));
+        // gBasicShader->SetUniform3f("eyePosition", gCamera->GetPosition());
 
-        for (size_t meshIndex = 0; meshIndex < meshToMaterial.size(); ++meshIndex)
-        {
-            size_t materialIndex = meshToMaterial[meshIndex];
-            Renderer::Material* material = materials[materialIndex];
-            Renderer::Mesh* mesh = meshes[meshIndex];
+        // gBasicShader->SetUniform1i("pointLightCount", gPointLights.size());
 
-            Renderer::Map* diffuseMap = material->GetMap(Asset::Type::MapTargetType::DIFFUSE);
-            if (diffuseMap != nullptr)
-            {
-                if (diffuseMap->GetSourceType() == Asset::Type::MapSourceType::COLOUR)
-                {
-                    gTestShader->SetUniform1i("material.useDiffuseTexture", 0);
-                    gTestShader->SetUniform3f("material.diffuseColour", diffuseMap->GetColour());
-                }
-                else
-                {
-                    gTestShader->SetUniform1i("material.useDiffuseTexture", 1);
-                    gTestShader->SetUniform1i("material.diffuseTexture", diffuseMap->GetTextureUnit());
-                }
-            }
+        // for (size_t i = 0; i < gPointLights.size(); ++i)
+        // {
+        //     std::string light = "pointLights[" + std::to_string(i) + "]";
+        //     gBasicShader->SetUniform3f(light + ".base.colour", gPointLights[i]->GetColour());
+        //     gBasicShader->SetUniform1f(light + ".base.ambientIntensity", gPointLights[i]->GetAmbientIntensity());
+        //     gBasicShader->SetUniform1f(light + ".base.diffuseIntensity", gPointLights[i]->GetDiffuseIntensity());
+        //     gBasicShader->SetUniform3f(light + ".position", gPointLights[i]->GetPosition());
+        //     gBasicShader->SetUniform1f(light + ".constant", gPointLights[i]->GetConstant());
+        //     gBasicShader->SetUniform1f(light + ".linear", gPointLights[i]->GetLinear());
+        //     gBasicShader->SetUniform1f(light + ".exponent", gPointLights[i]->GetExponent());
+        // }
 
-            Renderer::Map* specularMap = material->GetMap(Asset::Type::MapTargetType::SPECULAR);
-            if (specularMap != nullptr)
-            {
-                if (specularMap->GetSourceType() == Asset::Type::MapSourceType::COLOUR)
-                {
-                    gTestShader->SetUniform1i("material.useSpecularTexture", 0);
-                    gTestShader->SetUniform3f("material.specularColour", specularMap->GetColour());
-                }
-                else
-                {
-                    gTestShader->SetUniform1i("material.useSpecularTexture", 1);
-                    gTestShader->SetUniform1i("material.specularTexture", specularMap->GetTextureUnit());
-                }
-            }
+        // gBasicShader->SetUniform1i("spotLightCount", gSpotLights.size());
 
-            gTestShader->SetUniform1f("material.specularIntensity", material->GetSpecularIntensity());
-            gTestShader->SetUniform1f("material.shininess", material->GetShininess());
+        // for (size_t i = 0; i < gSpotLights.size(); ++i)
+        // {
+        //     std::string light = "spotLights[" + std::to_string(i) + "]";
+        //     gBasicShader->SetUniform3f(light + ".base.base.colour", gSpotLights[i]->GetColour());
+        //     gBasicShader->SetUniform1f(light + ".base.base.ambientIntensity", gSpotLights[i]->GetAmbientIntensity());
+        //     gBasicShader->SetUniform1f(light + ".base.base.diffuseIntensity", gSpotLights[i]->GetDiffuseIntensity());
+        //     gBasicShader->SetUniform3f(light + ".base.position", gSpotLights[i]->GetPosition());
+        //     gBasicShader->SetUniform1f(light + ".base.constant", gSpotLights[i]->GetConstant());
+        //     gBasicShader->SetUniform1f(light + ".base.linear", gSpotLights[i]->GetLinear());
+        //     gBasicShader->SetUniform1f(light + ".base.exponent", gSpotLights[i]->GetExponent());
+        //     gBasicShader->SetUniform3f(light + ".direction", gSpotLights[i]->GetDirection());
+        //     gBasicShader->SetUniform1f(light + ".edgeCosine", gSpotLights[i]->GetEdgeCosine());
+        // }
 
-            material->Bind();
-            mesh->Bind();
-            mesh->Draw();
-            mesh->Unbind();
-            material->Unbind();
-        }
+        // DrawModels(gBasicShader, true);
     }
 
     gWindow->SwapBuffers();

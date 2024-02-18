@@ -17,7 +17,9 @@ namespace Renderer::GL
         void Bind();
         void Unbind();
 
-        void Generate(GLint width, GLint height, GLint format, const void* data) const;
+        void Generate(GLint width, GLint height, GLenum format, GLenum type, GLint wrapMode, bool withMipmap, const void* data) const;
+
+        GLenum GetUnit() const;
 
     private:
         GLenum mUnit;

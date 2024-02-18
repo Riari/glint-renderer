@@ -1,8 +1,9 @@
-#include <iostream>
+#include "GL.h"
+
+#include <string>
+#include <unordered_map>
 
 #include <spdlog/spdlog.h>
-
-#include "GL.h"
 
 namespace Util::GL
 {
@@ -18,96 +19,41 @@ namespace Util::GL
         if (id == 131169 || id == 131185 || id == 131218 || id == 131204)
             return;
 
-        std::cout << "---------------" << std::endl;
-        std::cout << "Debug message (" << id << "): " << message << std::endl;
+        static const std::unordered_map<GLenum, std::string> sourceStrings = {
+            {GL_DEBUG_SOURCE_API, "API"},
+            {GL_DEBUG_SOURCE_WINDOW_SYSTEM, "Window System"},
+            {GL_DEBUG_SOURCE_SHADER_COMPILER, "Shader Compiler"},
+            {GL_DEBUG_SOURCE_THIRD_PARTY, "Third Party"},
+            {GL_DEBUG_SOURCE_APPLICATION, "Application"},
+            {GL_DEBUG_SOURCE_OTHER, "Other"},
+        };
 
-        switch (source)
-        {
-        case GL_DEBUG_SOURCE_API:
-            std::cout << "Source: API";
-            break;
-        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
-            std::cout << "Source: Window System";
-            break;
-        case GL_DEBUG_SOURCE_SHADER_COMPILER:
-            std::cout << "Source: Shader Compiler";
-            break;
-        case GL_DEBUG_SOURCE_THIRD_PARTY:
-            std::cout << "Source: Third Party";
-            break;
-        case GL_DEBUG_SOURCE_APPLICATION:
-            std::cout << "Source: Application";
-            break;
-        case GL_DEBUG_SOURCE_OTHER:
-            std::cout << "Source: Other";
-            break;
-        }
-        std::cout << std::endl;
+        static const std::unordered_map<GLenum, std::string> typeStrings = {
+            {GL_DEBUG_TYPE_ERROR, "Error"},
+            {GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, "Deprecated Behaviour"},
+            {GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR, "Undefined Behaviour"},
+            {GL_DEBUG_TYPE_PORTABILITY, "Portability"},
+            {GL_DEBUG_TYPE_PERFORMANCE, "Performance"},
+            {GL_DEBUG_TYPE_MARKER, "Marker"},
+            {GL_DEBUG_TYPE_PUSH_GROUP, "Push Group"},
+            {GL_DEBUG_TYPE_POP_GROUP, "Pop Group"},
+            {GL_DEBUG_TYPE_OTHER, "Other"},
+        };
 
-        switch (type)
-        {
-        case GL_DEBUG_TYPE_ERROR:
-            std::cout << "Type: Error";
-            break;
-        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-            std::cout << "Type: Deprecated Behaviour";
-            break;
-        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-            std::cout << "Type: Undefined Behaviour";
-            break;
-        case GL_DEBUG_TYPE_PORTABILITY:
-            std::cout << "Type: Portability";
-            break;
-        case GL_DEBUG_TYPE_PERFORMANCE:
-            std::cout << "Type: Performance";
-            break;
-        case GL_DEBUG_TYPE_MARKER:
-            std::cout << "Type: Marker";
-            break;
-        case GL_DEBUG_TYPE_PUSH_GROUP:
-            std::cout << "Type: Push Group";
-            break;
-        case GL_DEBUG_TYPE_POP_GROUP:
-            std::cout << "Type: Pop Group";
-            break;
-        case GL_DEBUG_TYPE_OTHER:
-            std::cout << "Type: Other";
-            break;
-        }
-        std::cout << std::endl;
+        static const std::unordered_map<GLenum, std::string> severityStrings = {
+            {GL_DEBUG_SEVERITY_HIGH, "High"},
+            {GL_DEBUG_SEVERITY_MEDIUM, "Medium"},
+            {GL_DEBUG_SEVERITY_LOW, "Low"},
+            {GL_DEBUG_SEVERITY_NOTIFICATION, "Info"},
+        };
 
-        switch (severity)
-        {
-        case GL_DEBUG_SEVERITY_HIGH:
-            std::cout << "Severity: high";
-            break;
-        case GL_DEBUG_SEVERITY_MEDIUM:
-            std::cout << "Severity: medium";
-            break;
-        case GL_DEBUG_SEVERITY_LOW:
-            std::cout << "Severity: low";
-            break;
-        case GL_DEBUG_SEVERITY_NOTIFICATION:
-            std::cout << "Severity: notification";
-            break;
-        }
-        std::cout << std::endl;
-        std::cout << std::endl;
-
-        return;
-    }
-
-    GLint CheckShaderBuildStatus(GLuint objectId, int type)
-    {
-        GLint success;
-        glGetShaderiv(objectId, type, &success);
-        if (!success)
-        {
-            GLchar infoLog[1024];
-            glGetShaderInfoLog(objectId, 1024, nullptr, infoLog);
-            spdlog::error("Shader program failed to build: {}", infoLog);
-        }
-
-        return success;
+        spdlog::error(
+            "[GL] [{}] [{}] [{}] {} (ID: {})",
+            sourceStrings.at(source),
+            typeStrings.at(type),
+            severityStrings.at(severity),
+            message,
+            id);
     }
 }
+

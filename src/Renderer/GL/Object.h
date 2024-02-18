@@ -11,7 +11,6 @@ namespace Renderer::GL
         Object(GLuint id);
 
         GLuint GetID() const { return mId; }
-        bool IsBound() const { return mIsBound; }
 
     protected:
         GLuint mId;

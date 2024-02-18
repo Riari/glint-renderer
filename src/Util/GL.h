@@ -12,6 +12,4 @@ namespace Util::GL
                                     GLsizei length,
                                     const char *message,
                                     const void *userParam);
-
-    GLint CheckShaderBuildStatus(GLuint objectId, int type);
 }

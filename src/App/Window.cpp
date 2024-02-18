@@ -4,18 +4,19 @@
 
 namespace App
 {
-    const int GL_VERSION_MAJOR = 4;
-    const int GL_VERSION_MINOR = 1;
+    const int GL_VERSION_MAJOR = 3;
+    const int GL_VERSION_MINOR = 3;
 
     Window::Window(int width, int height, const char* title)
         : mWidth(width)
         , mHeight(height)
         , mTitle(title)
     {
-        glfwWindowHint(GLFW_SAMPLES, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GL_VERSION_MAJOR);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GL_VERSION_MINOR);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 
         spdlog::info("Creating window {} x {} with OpenGL {}.{} context", width, height, GL_VERSION_MAJOR, GL_VERSION_MINOR);
 

@@ -1,3 +1,4 @@
 .vs/
 build/
 CMakeUserPresets.json
+renderdoc-settings.cap

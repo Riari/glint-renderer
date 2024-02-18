@@ -18,18 +18,12 @@ BufferObject::~BufferObject()
 
 void BufferObject::Bind()
 {
-    if (mIsBound) return;
-
     glBindBuffer(mTarget, mId);
-    mIsBound = true;
 }
 
 void BufferObject::Unbind()
 {
-    if (!mIsBound) return;
-
     glBindBuffer(mTarget, 0);
-    mIsBound = false;
 }
 
 void BufferObject::Write(unsigned int size, const void *pData, const unsigned int usage) const

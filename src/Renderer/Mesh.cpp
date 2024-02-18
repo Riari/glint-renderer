@@ -41,7 +41,6 @@ namespace Renderer
     void Mesh::Bind()
     {
         mVAO.Bind();
-        mVBO.Bind();
         mEBO.Bind();
     }
 
@@ -52,9 +51,8 @@ namespace Renderer
 
     void Mesh::Unbind()
     {
-        mVAO.Unbind();
-        mVBO.Unbind();
         mEBO.Unbind();
+        mVAO.Unbind();
     }
 
     void Mesh::GenerateNormals(size_t normalAttributeIndex)

@@ -11,8 +11,8 @@ namespace Renderer::GL
         FBO();
         ~FBO();
 
-        void Bind() const;
-        void Unbind() const;
+        void Bind();
+        void Unbind();
 
         void AttachTexture(const GL::Texture& texture, const GLenum attachment) const;
 

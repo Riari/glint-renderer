@@ -19,7 +19,7 @@ namespace Renderer
         const float constant,
         const float linear,
         const float exponent)
-        : Light(color, ambientIntensity, diffuseIntensity)
+        : Light(1024, 1024, color, ambientIntensity, diffuseIntensity)
         , mPosition(position)
         , mConstant(constant)
         , mLinear(linear)

@@ -15,9 +15,8 @@ set(SOURCES
     src/Renderer/GL/Buffer/FBO.cpp
     src/Renderer/GL/Buffer/VAO.cpp
     src/Renderer/GL/Buffer/VBO.cpp
+    src/Renderer/GL/Shader/Program.cpp
     src/Renderer/GL/Object.cpp
-    src/Renderer/GL/Shader.cpp
-    src/Renderer/GL/ShaderProgram.cpp
     src/Renderer/GL/Texture.cpp
     src/Renderer/Light/DirectionalLight.cpp
     src/Renderer/Light/Light.cpp
@@ -46,9 +45,8 @@ set(HEADERS
     src/Renderer/GL/Buffer/FBO.h
     src/Renderer/GL/Buffer/VAO.h
     src/Renderer/GL/Buffer/VBO.h
+    src/Renderer/GL/Shader/Program.h
     src/Renderer/GL/Object.h
-    src/Renderer/GL/Shader.h
-    src/Renderer/GL/ShaderProgram.h
     src/Renderer/GL/Texture.h
     src/Renderer/Light/DirectionalLight.h
     src/Renderer/Light/Light.h

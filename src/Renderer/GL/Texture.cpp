@@ -27,34 +27,41 @@ Texture::~Texture()
 
 void Texture::Bind()
 {
-    if (mIsBound) return;
-
     glActiveTexture(GL_TEXTURE0 + mUnit);
     glBindTexture(GL_TEXTURE_2D, mId);
-    mIsBound = true;
 }
 
 void Texture::Unbind()
 {
-    if (!mIsBound) return;
-
     glBindTexture(GL_TEXTURE_2D, 0);
-    mIsBound = false;
 }
 
-void Texture::Generate(GLint width, GLint height, GLint format, const void* data) const
+void Texture::Generate(GLint width, GLint height, GLenum format, GLenum type, GLint wrapMode, bool withMipmap, const void* data) const
 {
-    assert(("Texture must be bound before operating on it", mIsBound));
-
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, type, data);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glGenerateMipmap(GL_TEXTURE_2D);
+
+    if (wrapMode == GL_CLAMP_TO_BORDER)
+    {
+        float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    }
+
+    if (withMipmap)
+    {
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+}
+
+GLenum Texture::GetUnit() const
+{
+    return mUnit;
 }
 
 void Texture::GenerateFromImage(const Asset::Type::Image& image) const
 {
-    Generate(image.width, image.height, image.channels == 3 ? GL_RGB : GL_RGBA, image.data);
+    Generate(image.width, image.height, image.channels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, GL_REPEAT, true, image.data);
 }

@@ -72,7 +72,7 @@ float CalcDirectionalShadowFactor(DirectionalLight light)
 
 	float current = projection.z;
 
-	vec3 normal = normalize(vertexNormal);
+	vec3 normal = -normalize(vertexNormal);
 	vec3 lightDirection = normalize(directionalLight.direction);
 
 	float bias = max(0.05 * (1.0 - dot(normal, lightDirection)), 0.0005);

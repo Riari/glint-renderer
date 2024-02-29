@@ -22,6 +22,8 @@ namespace App
 
         mHandle = glfwCreateWindow(width, height, title, NULL, NULL);
 
+        glfwGetFramebufferSize(mHandle, &mBufferWidth, &mBufferHeight);
+
         glfwSetWindowUserPointer(mHandle, this);
 
         InitCallbacks();
@@ -51,6 +53,16 @@ namespace App
     int Window::GetHeight() const
     {
         return mHeight;
+    }
+
+    int Window::GetBufferWidth() const
+    {
+        return mBufferWidth;
+    }
+
+    int Window::GetBufferHeight() const
+    {
+        return mBufferHeight;
     }
 
     void Window::MakeCurrent() const

@@ -70,15 +70,15 @@ const std::vector<GLuint> FLOOR_INDICES = {
 };
 
 const std::vector<GLfloat> QUAD_VERTICES = {
-    -1.0f, -1.0f,
-     1.0f, -1.0f,
-    -1.0f,  1.0f,
-     1.0f,  1.0f,
+    -1.0f,  1.0f, 0.0f, 0.0f, 1.0f, // Top-left
+     1.0f,  1.0f, 0.0f, 1.0f, 1.0f, // Top-right
+     1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // Bottom-right
+    -1.0f, -1.0f, 0.0f, 0.0f, 0.0f  // Bottom-left
 };
 
 const std::vector<GLuint> QUAD_INDICES = {
     0, 1, 2,
-    2, 1, 3,
+    2, 3, 0,
 };
 
 std::vector<Renderer::Model*> gTestModels;
@@ -186,6 +186,8 @@ bool init()
     // OpenGL flags
     {
         glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
 
         int flags;
         glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
@@ -243,7 +245,7 @@ bool init()
     spdlog::info("Creating world objects");
     {
         gCamera = new Renderer::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 1.0f, 0.3f);
-        gDirectionalLight = new Renderer::DirectionalLight(2048, 2048, glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f, glm::vec3(0.0f, -15.0f, -10.0f));
+        gDirectionalLight = new Renderer::DirectionalLight(2048, 2048, glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.3f, glm::vec3(0.0f, -15.0f, -10.0f));
 
         // gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.0f, 0.5f), 0.0f, 1.0f, glm::vec3(0.0f, 0.5f, -3.0f), 0.3f, 0.1f, 0.1f));
         // gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.0f, 0.75f, 1.0f), 0.0f, 1.0f, glm::vec3(3.0f, 0.5f, 0.0f), 0.3f, 0.1f, 0.1f));
@@ -330,7 +332,7 @@ bool init()
 
     gDebugQuad = new Renderer::Model();
     gDebugQuad->AddMesh(
-        new Renderer::Mesh(QUAD_VERTICES, QUAD_INDICES, 2, { 2 }, false),
+        new Renderer::Mesh(QUAD_VERTICES, QUAD_INDICES, 5, { 3, 2 }, false),
         new Renderer::Material(0.0f, 0.0f));
 
     spdlog::info("Initialisation complete!");
@@ -443,69 +445,68 @@ bool loop()
 
     // Render pass: visualize directional shadow depth buffer
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        gDirectionalLight->GetShadowMap()->GetMap()->Bind();
-        gDebugQuadShader->Use();
-        gDebugQuadShader->SetUniform1i("textureSampler", gDirectionalLight->GetShadowMap()->GetMap()->GetUnit());
-        DrawModel(gDebugQuadShader, gDebugQuad, false);
+        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // glViewport(0, 0, gWindow->GetBufferWidth(), gWindow->GetBufferHeight());
+        // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // gDirectionalLight->GetShadowMap()->GetMap()->Bind();
+        // gDebugQuadShader->Use();
+        // gDebugQuadShader->SetUniform1i("textureSampler", gDirectionalLight->GetShadowMap()->GetMap()->GetUnit());
+        // DrawModel(gDebugQuadShader, gDebugQuad, false);
     }
 
     // Render pass: scene
     {
-        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        // glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        // glClear(GL_COLOR_BUFFER_BIT);
+        gBasicShader->Use();
 
-        // gDirectionalLight->GetShadowMap()->GetMap()->Bind();
+        glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // gBasicShader->Use();
-        // glm::mat4 view = gCamera->GetViewMatrix();
-        // gBasicShader->SetUniformMatrix4fv("view", glm::value_ptr(view));
-        // gBasicShader->SetUniformMatrix4fv("projection", glm::value_ptr(projection));
-        // gBasicShader->SetUniform3f("directionalLight.base.colour", gDirectionalLight->GetColour());
-        // gBasicShader->SetUniform1f("directionalLight.base.ambientIntensity", gDirectionalLight->GetAmbientIntensity());
-        // gBasicShader->SetUniform1f("directionalLight.base.diffuseIntensity", gDirectionalLight->GetDiffuseIntensity());
-        // gBasicShader->SetUniform3f("directionalLight.direction", gDirectionalLight->GetDirection());
-        // gBasicShader->SetUniform1i("directionalShadowMap", gDirectionalLight->GetShadowMap()->GetMap()->GetUnit());
-        // glm::mat4 directionalLightTransform = gDirectionalLight->CalculateLightTransform();
-        // gBasicShader->SetUniformMatrix4fv("directionalLightTransform", glm::value_ptr(directionalLightTransform));
-        // gBasicShader->SetUniform3f("eyePosition", gCamera->GetPosition());
+        glm::mat4 view = gCamera->GetViewMatrix();
+        gBasicShader->SetUniformMatrix4fv("view", glm::value_ptr(view));
+        gBasicShader->SetUniformMatrix4fv("projection", glm::value_ptr(projection));
+        gBasicShader->SetUniform3f("directionalLight.base.colour", gDirectionalLight->GetColour());
+        gBasicShader->SetUniform1f("directionalLight.base.ambientIntensity", gDirectionalLight->GetAmbientIntensity());
+        gBasicShader->SetUniform1f("directionalLight.base.diffuseIntensity", gDirectionalLight->GetDiffuseIntensity());
+        gBasicShader->SetUniform3f("directionalLight.direction", gDirectionalLight->GetDirection());
 
-        // gBasicShader->SetUniform1i("pointLightCount", gPointLights.size());
+        gDirectionalLight->GetShadowMap()->GetMap()->Bind();
+        gBasicShader->SetUniform1i("directionalShadowMap", gDirectionalLight->GetShadowMap()->GetMap()->GetUnit());
+        glm::mat4 directionalLightTransform = gDirectionalLight->CalculateLightTransform();
+        gBasicShader->SetUniformMatrix4fv("directionalLightTransform", glm::value_ptr(directionalLightTransform));
 
-        // for (size_t i = 0; i < gPointLights.size(); ++i)
-        // {
-        //     std::string light = "pointLights[" + std::to_string(i) + "]";
-        //     gBasicShader->SetUniform3f(light + ".base.colour", gPointLights[i]->GetColour());
-        //     gBasicShader->SetUniform1f(light + ".base.ambientIntensity", gPointLights[i]->GetAmbientIntensity());
-        //     gBasicShader->SetUniform1f(light + ".base.diffuseIntensity", gPointLights[i]->GetDiffuseIntensity());
-        //     gBasicShader->SetUniform3f(light + ".position", gPointLights[i]->GetPosition());
-        //     gBasicShader->SetUniform1f(light + ".constant", gPointLights[i]->GetConstant());
-        //     gBasicShader->SetUniform1f(light + ".linear", gPointLights[i]->GetLinear());
-        //     gBasicShader->SetUniform1f(light + ".exponent", gPointLights[i]->GetExponent());
-        // }
+        gBasicShader->SetUniform3f("eyePosition", gCamera->GetPosition());
 
-        // gBasicShader->SetUniform1i("spotLightCount", gSpotLights.size());
+        gBasicShader->SetUniform1i("pointLightCount", gPointLights.size());
+        for (size_t i = 0; i < gPointLights.size(); ++i)
+        {
+            std::string light = "pointLights[" + std::to_string(i) + "]";
+            gBasicShader->SetUniform3f(light + ".base.colour", gPointLights[i]->GetColour());
+            gBasicShader->SetUniform1f(light + ".base.ambientIntensity", gPointLights[i]->GetAmbientIntensity());
+            gBasicShader->SetUniform1f(light + ".base.diffuseIntensity", gPointLights[i]->GetDiffuseIntensity());
+            gBasicShader->SetUniform3f(light + ".position", gPointLights[i]->GetPosition());
+            gBasicShader->SetUniform1f(light + ".constant", gPointLights[i]->GetConstant());
+            gBasicShader->SetUniform1f(light + ".linear", gPointLights[i]->GetLinear());
+            gBasicShader->SetUniform1f(light + ".exponent", gPointLights[i]->GetExponent());
+        }
 
-        // for (size_t i = 0; i < gSpotLights.size(); ++i)
-        // {
-        //     std::string light = "spotLights[" + std::to_string(i) + "]";
-        //     gBasicShader->SetUniform3f(light + ".base.base.colour", gSpotLights[i]->GetColour());
-        //     gBasicShader->SetUniform1f(light + ".base.base.ambientIntensity", gSpotLights[i]->GetAmbientIntensity());
-        //     gBasicShader->SetUniform1f(light + ".base.base.diffuseIntensity", gSpotLights[i]->GetDiffuseIntensity());
-        //     gBasicShader->SetUniform3f(light + ".base.position", gSpotLights[i]->GetPosition());
-        //     gBasicShader->SetUniform1f(light + ".base.constant", gSpotLights[i]->GetConstant());
-        //     gBasicShader->SetUniform1f(light + ".base.linear", gSpotLights[i]->GetLinear());
-        //     gBasicShader->SetUniform1f(light + ".base.exponent", gSpotLights[i]->GetExponent());
-        //     gBasicShader->SetUniform3f(light + ".direction", gSpotLights[i]->GetDirection());
-        //     gBasicShader->SetUniform1f(light + ".edgeCosine", gSpotLights[i]->GetEdgeCosine());
-        // }
+        gBasicShader->SetUniform1i("spotLightCount", gSpotLights.size());
+        for (size_t i = 0; i < gSpotLights.size(); ++i)
+        {
+            std::string light = "spotLights[" + std::to_string(i) + "]";
+            gBasicShader->SetUniform3f(light + ".base.base.colour", gSpotLights[i]->GetColour());
+            gBasicShader->SetUniform1f(light + ".base.base.ambientIntensity", gSpotLights[i]->GetAmbientIntensity());
+            gBasicShader->SetUniform1f(light + ".base.base.diffuseIntensity", gSpotLights[i]->GetDiffuseIntensity());
+            gBasicShader->SetUniform3f(light + ".base.position", gSpotLights[i]->GetPosition());
+            gBasicShader->SetUniform1f(light + ".base.constant", gSpotLights[i]->GetConstant());
+            gBasicShader->SetUniform1f(light + ".base.linear", gSpotLights[i]->GetLinear());
+            gBasicShader->SetUniform1f(light + ".base.exponent", gSpotLights[i]->GetExponent());
+            gBasicShader->SetUniform3f(light + ".direction", gSpotLights[i]->GetDirection());
+            gBasicShader->SetUniform1f(light + ".edgeCosine", gSpotLights[i]->GetEdgeCosine());
+        }
 
-        // DrawModels(gBasicShader, true);
+        DrawModels(gBasicShader, true);
     }
 
     gWindow->SwapBuffers();

@@ -19,6 +19,9 @@ namespace App
         int GetWidth() const;
         int GetHeight() const;
 
+        int GetBufferWidth() const;
+        int GetBufferHeight() const;
+
         void MakeCurrent() const;
         bool ShouldClose() const;
         void SwapBuffers() const;
@@ -32,6 +35,7 @@ namespace App
         GLFWwindow* mHandle;
 
         int mWidth, mHeight;
+        int mBufferWidth, mBufferHeight;
         const char* mTitle;
 
         bool mKeysPressed[MAX_KEYS];

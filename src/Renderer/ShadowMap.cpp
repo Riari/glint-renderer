@@ -6,7 +6,7 @@ namespace Renderer
         : mWidth(width)
         , mHeight(height)
         , mFBO(new GL::FBO())
-        , mMap(new GL::Texture(10)) // TODO: Don't hardcode the texture unit
+        , mMap(new GL::Texture(5)) // TODO: Don't hardcode the texture unit
     {
     }
 

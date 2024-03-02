@@ -67,35 +67,35 @@ uniform vec3 eyePosition;
 
 float CalcDirectionalShadowFactor(DirectionalLight light)
 {
-	vec3 projection = vertexDirectionalLightSpacePosition.xyz / vertexDirectionalLightSpacePosition.w;
-	projection = (projection * 0.5) + 0.5;
+    vec3 projection = vertexDirectionalLightSpacePosition.xyz / vertexDirectionalLightSpacePosition.w;
+    projection = (projection * 0.5) + 0.5;
 
-	float current = projection.z;
+    float current = projection.z;
 
-	vec3 normal = -normalize(vertexNormal);
-	vec3 lightDirection = normalize(directionalLight.direction);
+    if (current > 1.0)
+    {
+        return 0.0;
+    }
 
-	float bias = max(0.05 * (1.0 - dot(normal, lightDirection)), 0.0005);
+    vec3 normal = -normalize(vertexNormal);
+    vec3 lightDirection = normalize(directionalLight.direction);
 
-	float shadow = 0.0;
-	vec2 texelSize = 1.0 / textureSize(directionalShadowMap, 0);
-	for (int x = -1; x <= 1; ++x)
-	{
-		for (int y = -1; y <= 1; ++y)
-		{
-			float pcfDepth = texture(directionalShadowMap, projection.xy + vec2(x, y) * texelSize).r;
-			shadow += current - bias > pcfDepth ? 1.0 : 0.0;
-		}
-	}
+    float bias = max(0.05 * (1.0 - dot(normal, lightDirection)), 0.0005);
 
-	shadow /= 9.0;
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(directionalShadowMap, 0);
+    for (int x = -1; x <= 1; ++x)
+    {
+        for (int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(directionalShadowMap, projection.xy + vec2(x, y) * texelSize).r;
+            shadow += current - bias > pcfDepth ? 1.0 : 0.0;
+        }
+    }
 
-	if (projection.z > 1.0)
-	{
-		shadow = 0.0;
-	}
+    shadow /= 9.0;
 
-	return shadow;
+    return shadow;
 }
 
 vec4 CalcLightByDirection(Light light, vec3 direction, float shadowFactor)
@@ -130,8 +130,8 @@ vec4 CalcLightByDirection(Light light, vec3 direction, float shadowFactor)
 
 vec4 CalcDirectionalLight()
 {
-	float shadowFactor = CalcDirectionalShadowFactor(directionalLight);
-	return CalcLightByDirection(directionalLight.base, directionalLight.direction, shadowFactor);
+    float shadowFactor = CalcDirectionalShadowFactor(directionalLight);
+    return CalcLightByDirection(directionalLight.base, directionalLight.direction, shadowFactor);
 }
 
 vec4 CalcPointLight(PointLight pointLight)

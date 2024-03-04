@@ -1,9 +1,11 @@
 #include "PointLight.h"
 
+#include "Renderer/Constants.h"
+
 namespace Renderer
 {
     PointLight::PointLight()
-        : Light()
+        : Light(new ShadowMap(SHADOW_MAP_RESOLUTION, GL_TEXTURE_CUBE_MAP, TEXTURE_UNIT_OMNIDIRECTIONAL_SHADOWMAP))
         , mPosition(glm::vec3(0.0f, 0.0f, 0.0f))
         , mConstant(1.0f)
         , mLinear(0.0f)
@@ -12,14 +14,18 @@ namespace Renderer
     }
 
     PointLight::PointLight(
-        const glm::vec3& color,
-        const float ambientIntensity,
-        const float diffuseIntensity,
-        const glm::vec3& position,
-        const float constant,
-        const float linear,
-        const float exponent)
-        : Light(1024, 1024, color, ambientIntensity, diffuseIntensity)
+        glm::vec3& color,
+        float ambientIntensity,
+        float diffuseIntensity,
+        glm::vec3& position,
+        float constant,
+        float linear,
+        float exponent)
+        : Light(
+            color,
+            ambientIntensity,
+            diffuseIntensity,
+            new ShadowMap(SHADOW_MAP_RESOLUTION, GL_TEXTURE_CUBE_MAP, TEXTURE_UNIT_OMNIDIRECTIONAL_SHADOWMAP))
         , mPosition(position)
         , mConstant(constant)
         , mLinear(linear)

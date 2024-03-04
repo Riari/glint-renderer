@@ -8,7 +8,7 @@ namespace Renderer
     class ShadowMap
     {
     public:
-        ShadowMap(int width, int height);
+        ShadowMap(int size, GLenum textureTarget, int textureUnit);
         ~ShadowMap();
 
         bool Init();
@@ -16,12 +16,11 @@ namespace Renderer
         void BindFramebuffer();
         void UnbindFramebuffer();
 
-        int GetWidth() const;
-        int GetHeight() const;
+        int GetSize() const;
         GL::Texture* GetMap() const;
 
     private:
-        int mWidth, mHeight;
+        int mSize;
         GL::FBO* mFBO;
         GL::Texture* mMap;
     };

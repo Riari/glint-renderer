@@ -10,15 +10,15 @@ namespace Renderer
     }
 
     SpotLight::SpotLight(
-        const glm::vec3& color,
-        const float ambientIntensity,
-        const float diffuseIntensity,
-        const glm::vec3& position,
-        const glm::vec3& direction,
-        const float constant,
-        const float linear,
-        const float exponent,
-        const float edgeAngleDeg)
+        glm::vec3 color,
+        float ambientIntensity,
+        float diffuseIntensity,
+        glm::vec3 position,
+        glm::vec3 direction,
+        float constant,
+        float linear,
+        float exponent,
+        float edgeAngleDeg)
         : PointLight(color, ambientIntensity, diffuseIntensity, position, constant, linear, exponent)
         , mDirection(glm::normalize(direction))
         , mEdgeAngleDeg(edgeAngleDeg)

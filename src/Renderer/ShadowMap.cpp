@@ -2,11 +2,10 @@
 
 namespace Renderer
 {
-    ShadowMap::ShadowMap(int width, int height)
-        : mWidth(width)
-        , mHeight(height)
+    ShadowMap::ShadowMap(int size, GLenum textureTarget, int textureUnit)
+        : mSize(size)
         , mFBO(new GL::FBO())
-        , mMap(new GL::Texture(5)) // TODO: Don't hardcode the texture unit
+        , mMap(new GL::Texture(textureTarget, textureUnit))
     {
     }
 
@@ -17,7 +16,7 @@ namespace Renderer
 
     bool ShadowMap::Init()
     {
-        mMap->Generate(mWidth, mHeight, GL_DEPTH_COMPONENT, GL_FLOAT, GL_CLAMP_TO_BORDER, false, nullptr);
+        mMap->Generate(mSize, mSize, GL_DEPTH_COMPONENT, GL_FLOAT, GL_CLAMP_TO_BORDER, false, nullptr);
         mFBO->Bind();
         mFBO->AttachTexture(*mMap, GL_DEPTH_ATTACHMENT);
         mFBO->SetDrawMode(GL_NONE);
@@ -39,14 +38,9 @@ namespace Renderer
         mFBO->Unbind();
     }
 
-    int ShadowMap::GetWidth() const
+    int ShadowMap::GetSize() const
     {
-        return mWidth;
-    }
-
-    int ShadowMap::GetHeight() const
-    {
-        return mHeight;
+        return mSize;
     }
 
     GL::Texture* ShadowMap::GetMap() const

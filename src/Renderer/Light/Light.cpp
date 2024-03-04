@@ -1,17 +1,23 @@
 #include "Light.h"
 
+#include "Renderer/Constants.h"
+
 namespace Renderer
 {
-    Light::Light()
-        : Light(2048, 2048, glm::vec3(1.0f), 1.0f, 1.0f)
+    Light::Light(ShadowMap* shadowMap)
+        : Light(glm::vec3(1.0f), 1.0f, 1.0f, shadowMap)
     {
     }
 
-    Light::Light(const int shadowWidth, const int shadowHeight, const glm::vec3& colour, const float ambientIntensity, const float diffuseIntensity)
+    Light::Light(
+        glm::vec3 colour,
+        float ambientIntensity,
+        float diffuseIntensity,
+        ShadowMap* shadowMap)
         : mColour(colour)
         , mAmbientIntensity(ambientIntensity)
         , mDiffuseIntensity(diffuseIntensity)
-        , mShadowMap(new ShadowMap(shadowWidth, shadowHeight))
+        , mShadowMap(shadowMap)
     {
         // TODO: Handle init failure
         mShadowMap->Init();

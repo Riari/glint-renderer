@@ -23,7 +23,7 @@ namespace Renderer
                 break;
         }
 
-        mTexture = new GL::Texture(image, mTextureUnit);
+        mTexture = new GL::Texture(image, GL_TEXTURE_2D, mTextureUnit);
     }
 
     Map::~Map()

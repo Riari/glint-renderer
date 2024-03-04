@@ -245,7 +245,11 @@ bool init()
     spdlog::info("Creating world objects");
     {
         gCamera = new Renderer::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 1.0f, 0.3f);
-        gDirectionalLight = new Renderer::DirectionalLight(2048, 2048, glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.3f, glm::vec3(0.0f, -15.0f, -10.0f));
+        gDirectionalLight = new Renderer::DirectionalLight(
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            0.1f,
+            0.3f,
+            glm::vec3(0.0f, -15.0f, -10.0f));
 
         // gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.0f, 0.5f), 0.0f, 1.0f, glm::vec3(0.0f, 0.5f, -3.0f), 0.3f, 0.1f, 0.1f));
         // gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.0f, 0.75f, 1.0f), 0.0f, 1.0f, glm::vec3(3.0f, 0.5f, 0.0f), 0.3f, 0.1f, 0.1f));
@@ -430,7 +434,7 @@ bool loop()
         gDirectionalShadowMapShader->Use();
 
         Renderer::ShadowMap* shadowMap = gDirectionalLight->GetShadowMap();
-        glViewport(0, 0, shadowMap->GetWidth(), shadowMap->GetHeight());
+        glViewport(0, 0, shadowMap->GetSize(), shadowMap->GetSize());
 
         shadowMap->BindFramebuffer();
 	    glClear(GL_DEPTH_BUFFER_BIT);

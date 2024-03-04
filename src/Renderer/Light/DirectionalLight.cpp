@@ -2,16 +2,26 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Renderer/Constants.h"
+
 namespace Renderer
 {
     DirectionalLight::DirectionalLight()
-        : Light()
+        : Light(new ShadowMap(SHADOW_MAP_RESOLUTION, GL_TEXTURE_2D, TEXTURE_UNIT_DIRECTIONAL_SHADOWMAP))
         , mDirection(glm::vec3(0.0f, -1.0f, 0.0f))
     {
     }
 
-    DirectionalLight::DirectionalLight(const int shadowWidth, const int shadowHeight, const glm::vec3& color, const float ambientIntensity, const float diffuseIntensity, const glm::vec3& direction)
-        : Light(shadowWidth, shadowHeight, color, ambientIntensity, diffuseIntensity)
+    DirectionalLight::DirectionalLight(
+        glm::vec3 color,
+        float ambientIntensity,
+        float diffuseIntensity,
+        glm::vec3 direction)
+        : Light(
+            color,
+            ambientIntensity,
+            diffuseIntensity,
+            new ShadowMap(SHADOW_MAP_RESOLUTION, GL_TEXTURE_2D, TEXTURE_UNIT_DIRECTIONAL_SHADOWMAP))
         , mDirection(direction)
     {
     }

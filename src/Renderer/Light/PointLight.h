@@ -9,13 +9,13 @@ namespace Renderer
     public:
         PointLight();
         PointLight(
-            const glm::vec3& color,
-            const float ambientIntensity,
-            const float diffuseIntensity,
-            const glm::vec3& position,
-            const float constant,
-            const float linear,
-            const float exponent);
+            glm::vec3& color,
+            float ambientIntensity,
+            float diffuseIntensity,
+            glm::vec3& position,
+            float constant,
+            float linear,
+            float exponent);
         ~PointLight() = default;
 
         glm::vec3 GetPosition() const;

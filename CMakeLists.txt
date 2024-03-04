@@ -27,6 +27,7 @@ set(SOURCES
     src/Renderer/Material.cpp
     src/Renderer/Mesh.cpp
     src/Renderer/Model.cpp
+    src/Renderer/OmniShadowMap.cpp
     src/Renderer/ShadowMap.cpp
     src/Util/File.cpp
     src/Util/GL.cpp
@@ -53,10 +54,12 @@ set(HEADERS
     src/Renderer/Light/PointLight.h
     src/Renderer/Light/SpotLight.h
     src/Renderer/Camera.h
+    src/Renderer/Constants.h
     src/Renderer/Map.h
     src/Renderer/Material.h
     src/Renderer/Mesh.h
     src/Renderer/Model.h
+    src/Renderer/OmniShadowMap.h
     src/Renderer/ShadowMap.h
     src/Util/File.h
     src/Util/GL.h

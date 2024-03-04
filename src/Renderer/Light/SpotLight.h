@@ -9,15 +9,15 @@ namespace Renderer
     public:
         SpotLight();
         SpotLight(
-            const glm::vec3& color,
-            const float ambientIntensity,
-            const float diffuseIntensity,
-            const glm::vec3& position,
-            const glm::vec3& direction,
-            const float constant,
-            const float linear,
-            const float exponent,
-            const float edge);
+            glm::vec3 color,
+            float ambientIntensity,
+            float diffuseIntensity,
+            glm::vec3 position,
+            glm::vec3 direction,
+            float constant,
+            float linear,
+            float exponent,
+            float edge);
         ~SpotLight() = default;
 
         glm::vec3 GetDirection() const;

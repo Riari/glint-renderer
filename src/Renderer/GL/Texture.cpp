@@ -6,14 +6,15 @@
 
 using namespace Renderer::GL;
 
-Texture::Texture(const Asset::Type::Image& image, GLenum unit)
-    : Texture(unit)
+Texture::Texture(const Asset::Type::Image& image, GLenum target, int unit)
+    : Texture(target, unit)
 {
     GenerateFromImage(image);
 }
 
-Texture::Texture(GLenum unit)
+Texture::Texture(GLenum target, int unit)
     : Object()
+    , mTarget(target)
     , mUnit(unit)
 {
     glGenTextures(1, &mId);
@@ -28,35 +29,42 @@ Texture::~Texture()
 void Texture::Bind()
 {
     glActiveTexture(GL_TEXTURE0 + mUnit);
-    glBindTexture(GL_TEXTURE_2D, mId);
+    glBindTexture(mTarget, mId);
 }
 
 void Texture::Unbind()
 {
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(mTarget, 0);
 }
 
-void Texture::Generate(GLint width, GLint height, GLenum format, GLenum type, GLint wrapMode, bool withMipmap, const void* data) const
+void Texture::Generate(
+    GLint width,
+    GLint height,
+    GLenum format,
+    GLenum type,
+    GLint wrapMode,
+    bool withMipmap,
+    const void* data) const
 {
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, type, data);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(mTarget, 0, format, width, height, 0, format, type, data);
+    glTexParameteri(mTarget, GL_TEXTURE_WRAP_S, wrapMode);
+    glTexParameteri(mTarget, GL_TEXTURE_WRAP_T, wrapMode);
+    glTexParameteri(mTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(mTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     if (wrapMode == GL_CLAMP_TO_BORDER)
     {
         float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+        glTexParameterfv(mTarget, GL_TEXTURE_BORDER_COLOR, borderColor);
     }
 
     if (withMipmap)
     {
-        glGenerateMipmap(GL_TEXTURE_2D);
+        glGenerateMipmap(mTarget);
     }
 }
 
-GLenum Texture::GetUnit() const
+int Texture::GetUnit() const
 {
     return mUnit;
 }

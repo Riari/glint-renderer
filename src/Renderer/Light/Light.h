@@ -10,8 +10,12 @@ namespace Renderer
     class Light
     {
     public:
-        Light();
-        Light(const int shadowWidth, const int shadowHeight, const glm::vec3& colour, const float ambientIntensity, const float diffuseIntensity);
+        Light(ShadowMap* shadowMap);
+        Light(
+            glm::vec3 colour,
+            float ambientIntensity,
+            float diffuseIntensity,
+            ShadowMap* shadowMap);
         ~Light();
 
         glm::vec3 GetColour() const;

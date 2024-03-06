@@ -27,7 +27,17 @@ namespace Renderer::GL
 
     void FBO::AttachTexture(const GL::Texture& texture, const GLenum attachment) const
     {
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture.GetID(), 0);
+        switch (texture.GetTarget())
+        {
+            case GL_TEXTURE_2D:
+                glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture.GetID(), 0);
+                break;
+            case GL_TEXTURE_CUBE_MAP:
+                glFramebufferTexture(GL_DRAW_FRAMEBUFFER, attachment, texture.GetID(), 0);
+                break;
+            default:
+                assert(!"Unhandled texture target in FBO::AttachTexture");
+        }
     }
 
     void FBO::SetDrawMode(GLenum mode) const

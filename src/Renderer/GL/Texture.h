@@ -27,6 +27,7 @@ namespace Renderer::GL
             const void* data
         ) const;
 
+        GLenum GetTarget() const;
         int GetUnit() const;
 
     private:

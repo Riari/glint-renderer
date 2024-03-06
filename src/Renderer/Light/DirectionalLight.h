@@ -7,7 +7,6 @@ namespace Renderer
     class DirectionalLight : public Light
     {
     public:
-        DirectionalLight();
         DirectionalLight(
             glm::vec3 color,
             float ambientIntensity,

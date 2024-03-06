@@ -7,7 +7,6 @@ namespace Renderer
     class SpotLight : public PointLight
     {
     public:
-        SpotLight();
         SpotLight(
             glm::vec3 color,
             float ambientIntensity,
@@ -25,7 +24,6 @@ namespace Renderer
 
     private:
         glm::vec3 mDirection;
-
         float mEdgeAngleDeg, mEdgeCosine;
     };
 };

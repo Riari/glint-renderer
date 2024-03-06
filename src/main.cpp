@@ -18,6 +18,7 @@
 #include "Renderer/Light/PointLight.h"
 #include "Renderer/Light/SpotLight.h"
 #include "Renderer/Camera.h"
+#include "Renderer/Constants.h"
 #include "Renderer/Map.h"
 #include "Renderer/Material.h"
 #include "Renderer/Mesh.h"
@@ -37,6 +38,7 @@ std::vector<Renderer::PointLight*> gPointLights;
 std::vector<Renderer::SpotLight*> gSpotLights;
 Renderer::GL::Shader::Program* gBasicShader;
 Renderer::GL::Shader::Program* gDirectionalShadowMapShader;
+Renderer::GL::Shader::Program* gOmnidirectionalShadowMapShader;
 Renderer::GL::Shader::Program* gDebugQuadShader;
 
 const int WINDOW_WIDTH{1920};
@@ -137,6 +139,7 @@ int main()
 
     delete gBasicShader;
     delete gDirectionalShadowMapShader;
+    delete gOmnidirectionalShadowMapShader;
     delete gDebugQuadShader;
 
     for (auto model : gTestModels)
@@ -219,6 +222,16 @@ bool init()
             return false;
         }
 
+        gOmnidirectionalShadowMapShader = new Renderer::GL::Shader::Program();
+        gOmnidirectionalShadowMapShader->AddShader(GL_VERTEX_SHADER, Util::File::Read("shaders/omnidirectional-shadow-map.vert.glsl"));
+        gOmnidirectionalShadowMapShader->AddShader(GL_GEOMETRY_SHADER, Util::File::Read("shaders/omnidirectional-shadow-map.geom.glsl"));
+        gOmnidirectionalShadowMapShader->AddShader(GL_FRAGMENT_SHADER, Util::File::Read("shaders/omnidirectional-shadow-map.frag.glsl"));
+        if (gOmnidirectionalShadowMapShader->Link() != 0)
+        {
+            glfwTerminate();
+            return false;
+        }
+
         gDebugQuadShader = new Renderer::GL::Shader::Program();
         gDebugQuadShader->AddShader(GL_VERTEX_SHADER, Util::File::Read("shaders/debug-quad.vert.glsl"));
         gDebugQuadShader->AddShader(GL_FRAGMENT_SHADER, Util::File::Read("shaders/debug-quad.frag.glsl"));
@@ -244,20 +257,72 @@ bool init()
 
     spdlog::info("Creating world objects");
     {
-        gCamera = new Renderer::Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 1.0f, 0.3f);
+        gCamera = new Renderer::Camera(
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f, 1.0f, 0.0f),
+            -60.0f, 0.0f,
+            1.0f,
+            0.3f);
+
         gDirectionalLight = new Renderer::DirectionalLight(
             glm::vec3(1.0f, 1.0f, 1.0f),
             0.1f,
             0.3f,
             glm::vec3(0.0f, -15.0f, -10.0f));
 
-        // gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.0f, 0.5f), 0.0f, 1.0f, glm::vec3(0.0f, 0.5f, -3.0f), 0.3f, 0.1f, 0.1f));
-        // gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.0f, 0.75f, 1.0f), 0.0f, 1.0f, glm::vec3(3.0f, 0.5f, 0.0f), 0.3f, 0.1f, 0.1f));
-        // gPointLights.push_back(new Renderer::PointLight(glm::vec3(1.0f, 0.42f, 0.0f), 0.0f, 1.0f, glm::vec3(-3.0f, 0.5f, 0.0f), 0.3f, 0.1f, 0.1f));
-        // gPointLights.push_back(new Renderer::PointLight(glm::vec3(0.47f, 0.0f, 1.0f), 0.0f, 1.0f, glm::vec3(0.0f, 0.5f, 3.0f), 0.3f, 0.1f, 0.1f));
+        gPointLights.push_back(new Renderer::PointLight(
+            glm::vec3(1.0f, 0.0f, 0.5f),
+            0.0f,
+            1.0f,
+            glm::vec3(0.0f, 0.5f, -3.0f),
+            0.3f,
+            0.1f,
+            0.1f));
+        gPointLights.push_back(new Renderer::PointLight(
+            glm::vec3(0.0f, 0.75f, 1.0f),
+            0.0f,
+            1.0f,
+            glm::vec3(3.0f, 0.5f, 0.0f),
+            0.3f,
+            0.1f,
+            0.1f));
+        gPointLights.push_back(new Renderer::PointLight(
+            glm::vec3(1.0f, 0.42f, 0.0f),
+            0.0f,
+            1.0f,
+            glm::vec3(-3.0f, 0.5f, 0.0f),
+            0.3f,
+            0.1f,
+            0.1f));
+        gPointLights.push_back(new Renderer::PointLight(
+            glm::vec3(0.47f, 0.0f, 1.0f),
+            0.0f,
+            1.0f,
+            glm::vec3(0.0f, 0.5f, 3.0f),
+            0.3f,
+            0.1f,
+            0.1f));
 
-        gSpotLights.push_back(new Renderer::SpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.35f, 2.5f, glm::vec3(-2.0f, 2.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, 0.2f, 0.1f, 40.0f));
-        gSpotLights.push_back(new Renderer::SpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.35f, 2.5f, glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, 0.2f, 0.1f, 40.0f));
+        gSpotLights.push_back(new Renderer::SpotLight(
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            0.35f,
+            2.5f,
+            glm::vec3(-2.0f, 2.0f, 0.0f),
+            glm::vec3(0.0f, -1.0f, 0.0f),
+            1.0f,
+            0.2f,
+            0.1f,
+            40.0f));
+        gSpotLights.push_back(new Renderer::SpotLight(
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            0.35f,
+            2.5f,
+            glm::vec3(2.0f, 2.0f, 0.0f),
+            glm::vec3(0.0f, -1.0f, 0.0f),
+            1.0f,
+            0.2f,
+            0.1f,
+            40.0f));
 
         gTestModels.push_back(new Renderer::Model());
         gTestModels.push_back(new Renderer::Model());
@@ -412,6 +477,32 @@ void DrawModels(Renderer::GL::Shader::Program* shaderProgram, bool withMaterials
     }
 }
 
+static void RenderPassOmnidirectionalLight(Renderer::PointLight* light)
+{
+    gOmnidirectionalShadowMapShader->Use();
+
+    Renderer::ShadowMap* shadowMap = light->GetShadowMap();
+    glViewport(0, 0, shadowMap->GetSize(), shadowMap->GetSize());
+
+    shadowMap->BindFramebuffer();
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    gOmnidirectionalShadowMapShader->SetUniform3f("lightPosition", light->GetPosition());
+    gOmnidirectionalShadowMapShader->SetUniform1f("farPlane", Renderer::FAR_PLANE);
+
+    std::vector<glm::mat4> lightMatrices = light->CalculateLightTransforms();
+
+    for (size_t i = 0; i < lightMatrices.size(); ++i)
+    {
+        std::string matrix = "lightMatrices[" + std::to_string(i) + "]";
+        gOmnidirectionalShadowMapShader->SetUniformMatrix4fv(matrix, glm::value_ptr(lightMatrices[i]));
+    }
+
+    DrawModels(gOmnidirectionalShadowMapShader, false);
+
+    shadowMap->UnbindFramebuffer();
+}
+
 bool loop()
 {
     if (gWindow->ShouldClose())
@@ -421,7 +512,7 @@ bool loop()
 
     glfwPollEvents();
 
-    glm::mat4 projection = glm::perspective(45.0f, (float)gWindow->GetWidth() / (float)gWindow->GetHeight(), 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float)gWindow->GetWidth() / (float)gWindow->GetHeight(), 0.1f, 100.0f);
     gCamera->Update(gWindow, static_cast<float>(gDeltaTime));
 
     // TODO: Come up with a better way of managing the interface between world objects (e.g. lights) and shader programs
@@ -429,7 +520,7 @@ bool loop()
     // TODO: Encapsulate render passes
 
 
-    // Render pass: shadow maps
+    // Render pass: directional shadow maps
     {
         gDirectionalShadowMapShader->Use();
 
@@ -437,7 +528,7 @@ bool loop()
         glViewport(0, 0, shadowMap->GetSize(), shadowMap->GetSize());
 
         shadowMap->BindFramebuffer();
-	    glClear(GL_DEPTH_BUFFER_BIT);
+        glClear(GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 directionalLightTransform = gDirectionalLight->CalculateLightTransform();
         gDirectionalShadowMapShader->SetUniformMatrix4fv("directionalLightTransform", glm::value_ptr(directionalLightTransform));
@@ -459,13 +550,26 @@ bool loop()
         // DrawModel(gDebugQuadShader, gDebugQuad, false);
     }
 
+    // Render pass: omnidirectional shadow maps
+    {
+        for (size_t i = 0; i < gPointLights.size(); ++i)
+        {
+            RenderPassOmnidirectionalLight(gPointLights[i]);
+        }
+
+        for (size_t i = 0; i < gSpotLights.size(); ++i)
+        {
+            RenderPassOmnidirectionalLight(gSpotLights[i]);
+        }
+    }
+
     // Render pass: scene
     {
         gBasicShader->Use();
 
         glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 view = gCamera->GetViewMatrix();
         gBasicShader->SetUniformMatrix4fv("view", glm::value_ptr(view));

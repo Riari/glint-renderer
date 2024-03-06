@@ -1,23 +1,17 @@
 #include "PointLight.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "Renderer/Constants.h"
+#include "Renderer/OmniShadowMap.h"
 
 namespace Renderer
 {
-    PointLight::PointLight()
-        : Light(new ShadowMap(SHADOW_MAP_RESOLUTION, GL_TEXTURE_CUBE_MAP, TEXTURE_UNIT_OMNIDIRECTIONAL_SHADOWMAP))
-        , mPosition(glm::vec3(0.0f, 0.0f, 0.0f))
-        , mConstant(1.0f)
-        , mLinear(0.0f)
-        , mExponent(0.0f)
-    {
-    }
-
     PointLight::PointLight(
-        glm::vec3& color,
+        glm::vec3 color,
         float ambientIntensity,
         float diffuseIntensity,
-        glm::vec3& position,
+        glm::vec3 position,
         float constant,
         float linear,
         float exponent)
@@ -25,12 +19,14 @@ namespace Renderer
             color,
             ambientIntensity,
             diffuseIntensity,
-            new ShadowMap(SHADOW_MAP_RESOLUTION, GL_TEXTURE_CUBE_MAP, TEXTURE_UNIT_OMNIDIRECTIONAL_SHADOWMAP))
+            new OmniShadowMap(SHADOW_MAP_RESOLUTION))
         , mPosition(position)
         , mConstant(constant)
         , mLinear(linear)
         , mExponent(exponent)
     {
+        float aspect = (float)SHADOW_MAP_RESOLUTION / (float)SHADOW_MAP_RESOLUTION;
+        mProjection = glm::perspective(glm::radians(90.0f), aspect, NEAR_PLANE, FAR_PLANE);
     }
 
     glm::vec3 PointLight::GetPosition() const
@@ -51,5 +47,23 @@ namespace Renderer
     float PointLight::GetExponent() const
     {
         return mExponent;
+    }
+
+    std::vector<glm::mat4> PointLight::CalculateLightTransforms() const
+    {
+        std::vector<glm::mat4> matrices(6);
+        // +x, -x
+        matrices.push_back(mProjection * glm::lookAt(mPosition, mPosition + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+        matrices.push_back(mProjection * glm::lookAt(mPosition, mPosition + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+
+        // +y, -y
+        matrices.push_back(mProjection * glm::lookAt(mPosition, mPosition + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+        matrices.push_back(mProjection * glm::lookAt(mPosition, mPosition + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+
+        // +z, -z
+        matrices.push_back(mProjection * glm::lookAt(mPosition, mPosition + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+        matrices.push_back(mProjection * glm::lookAt(mPosition, mPosition + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+
+        return matrices;
     }
 };

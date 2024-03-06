@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "Light.h"
 
 namespace Renderer
@@ -7,12 +9,11 @@ namespace Renderer
     class PointLight : public Light
     {
     public:
-        PointLight();
         PointLight(
-            glm::vec3& color,
+            glm::vec3 color,
             float ambientIntensity,
             float diffuseIntensity,
-            glm::vec3& position,
+            glm::vec3 position,
             float constant,
             float linear,
             float exponent);
@@ -22,6 +23,8 @@ namespace Renderer
         float GetConstant() const;
         float GetLinear() const;
         float GetExponent() const;
+
+        std::vector<glm::mat4> CalculateLightTransforms() const;
 
     protected:
         glm::vec3 mPosition;

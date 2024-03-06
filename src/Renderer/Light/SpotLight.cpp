@@ -2,13 +2,6 @@
 
 namespace Renderer
 {
-    SpotLight::SpotLight()
-        : PointLight()
-        , mDirection(glm::normalize(glm::vec3(0.0f, -1.0f, 0.0f)))
-        , mEdgeAngleDeg(0.0f)
-    {
-    }
-
     SpotLight::SpotLight(
         glm::vec3 color,
         float ambientIntensity,

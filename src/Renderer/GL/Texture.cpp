@@ -37,6 +37,7 @@ void Texture::Unbind()
     glBindTexture(mTarget, 0);
 }
 
+// TODO: Clean this method up
 void Texture::Generate(
     GLint width,
     GLint height,
@@ -46,11 +47,28 @@ void Texture::Generate(
     bool withMipmap,
     const void* data) const
 {
-    glTexImage2D(mTarget, 0, format, width, height, 0, format, type, data);
-    glTexParameteri(mTarget, GL_TEXTURE_WRAP_S, wrapMode);
-    glTexParameteri(mTarget, GL_TEXTURE_WRAP_T, wrapMode);
-    glTexParameteri(mTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(mTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    switch (mTarget)
+    {
+        case GL_TEXTURE_2D:
+            glTexImage2D(mTarget, 0, format, width, height, 0, format, type, data);
+            glTexParameteri(mTarget, GL_TEXTURE_WRAP_S, wrapMode);
+            glTexParameteri(mTarget, GL_TEXTURE_WRAP_T, wrapMode);
+            glTexParameteri(mTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(mTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            break;
+        case GL_TEXTURE_CUBE_MAP:
+            for (size_t i = 0; i < 6; ++i)
+            {
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, type, data);
+            }
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapMode);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            break;
+    }
 
     if (wrapMode == GL_CLAMP_TO_BORDER)
     {
@@ -62,6 +80,11 @@ void Texture::Generate(
     {
         glGenerateMipmap(mTarget);
     }
+}
+
+GLenum Texture::GetTarget() const
+{
+    return mTarget;
 }
 
 int Texture::GetUnit() const

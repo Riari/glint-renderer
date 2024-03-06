@@ -25,8 +25,7 @@ namespace Renderer
         ShadowMap* GetShadowMap() const;
 
     protected:
-        // TODO: pass these values through
-        glm::mat4 mLightProjection{glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 0.1f, 100.0f)};
+        glm::mat4 mProjection;
 
     private:
         glm::vec3 mColour;

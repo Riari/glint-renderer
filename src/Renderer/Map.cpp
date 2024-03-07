@@ -16,10 +16,10 @@ namespace Renderer
         switch (mTargetType)
         {
             case Asset::Type::MapTargetType::DIFFUSE:
-                mTextureUnit = 0;
+                mTextureUnit = 1;
                 break;
             case Asset::Type::MapTargetType::SPECULAR:
-                mTextureUnit = 1;
+                mTextureUnit = 2;
                 break;
         }
 

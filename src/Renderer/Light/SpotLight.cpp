@@ -11,8 +11,9 @@ namespace Renderer
         float constant,
         float linear,
         float exponent,
-        float edgeAngleDeg)
-        : PointLight(color, ambientIntensity, diffuseIntensity, position, constant, linear, exponent)
+        float edgeAngleDeg,
+        int shadowMapUnit)
+        : PointLight(color, ambientIntensity, diffuseIntensity, position, constant, linear, exponent, shadowMapUnit)
         , mDirection(glm::normalize(direction))
         , mEdgeAngleDeg(edgeAngleDeg)
         , mEdgeCosine(cosf(glm::radians(edgeAngleDeg)))

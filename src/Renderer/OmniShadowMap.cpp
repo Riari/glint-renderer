@@ -4,8 +4,8 @@
 
 namespace Renderer
 {
-    OmniShadowMap::OmniShadowMap(int size)
-        : ShadowMap(size, GL_TEXTURE_CUBE_MAP, TEXTURE_UNIT_OMNIDIRECTIONAL_SHADOWMAP)
+    OmniShadowMap::OmniShadowMap(int size, int textureUnit)
+        : ShadowMap(size, GL_TEXTURE_CUBE_MAP, textureUnit)
     {
     }
 }

@@ -11,7 +11,8 @@ namespace Renderer
             glm::vec3 color,
             float ambientIntensity,
             float diffuseIntensity,
-            glm::vec3 direction);
+            glm::vec3 direction,
+            int shadowMapUnit);
         ~DirectionalLight() = default;
 
         glm::vec3 GetDirection() const;

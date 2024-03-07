@@ -9,6 +9,7 @@ using namespace Renderer::GL;
 Texture::Texture(const Asset::Type::Image& image, GLenum target, int unit)
     : Texture(target, unit)
 {
+    assert(("Texture unit must be greater than GL_TEXTURE0", unit > 0));
     GenerateFromImage(image);
 }
 
@@ -62,13 +63,14 @@ void Texture::Generate(
                 glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, type, data);
             }
 
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapMode);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(mTarget, GL_TEXTURE_WRAP_R, wrapMode);
             break;
     }
+
+    glTexParameteri(mTarget, GL_TEXTURE_WRAP_S, wrapMode);
+    glTexParameteri(mTarget, GL_TEXTURE_WRAP_T, wrapMode);
+    glTexParameteri(mTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(mTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     if (wrapMode == GL_CLAMP_TO_BORDER)
     {

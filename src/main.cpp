@@ -265,64 +265,71 @@ bool init()
             0.3f);
 
         gDirectionalLight = new Renderer::DirectionalLight(
-            glm::vec3(1.0f, 1.0f, 1.0f),
-            0.1f,
-            0.3f,
-            glm::vec3(0.0f, -15.0f, -10.0f));
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            0.0f,
+            0.0f,
+            glm::vec3(0.0f, -15.0f, -10.0f),
+            5);
 
         gPointLights.push_back(new Renderer::PointLight(
             glm::vec3(1.0f, 0.0f, 0.5f),
-            0.0f,
-            1.0f,
-            glm::vec3(0.0f, 0.5f, -3.0f),
+            0.1f,
+            2.0f,
+            glm::vec3(0.0f, 2.5f, -3.0f),
             0.3f,
             0.1f,
-            0.1f));
+            0.1f,
+            6));
         gPointLights.push_back(new Renderer::PointLight(
             glm::vec3(0.0f, 0.75f, 1.0f),
-            0.0f,
-            1.0f,
-            glm::vec3(3.0f, 0.5f, 0.0f),
+            0.1f,
+            2.0f,
+            glm::vec3(3.0f, 2.5f, 0.0f),
             0.3f,
             0.1f,
-            0.1f));
+            0.1f,
+            7));
         gPointLights.push_back(new Renderer::PointLight(
             glm::vec3(1.0f, 0.42f, 0.0f),
-            0.0f,
-            1.0f,
-            glm::vec3(-3.0f, 0.5f, 0.0f),
+            0.1f,
+            2.0f,
+            glm::vec3(-3.0f, 2.5f, 0.0f),
             0.3f,
             0.1f,
-            0.1f));
+            0.1f,
+            8));
         gPointLights.push_back(new Renderer::PointLight(
             glm::vec3(0.47f, 0.0f, 1.0f),
-            0.0f,
-            1.0f,
-            glm::vec3(0.0f, 0.5f, 3.0f),
+            0.1f,
+            2.0f,
+            glm::vec3(0.0f, 2.5f, 3.0f),
             0.3f,
             0.1f,
-            0.1f));
+            0.1f,
+            9));
 
         gSpotLights.push_back(new Renderer::SpotLight(
             glm::vec3(1.0f, 1.0f, 1.0f),
-            0.35f,
+            0.0f,
             2.5f,
             glm::vec3(-2.0f, 2.0f, 0.0f),
             glm::vec3(0.0f, -1.0f, 0.0f),
             1.0f,
             0.2f,
             0.1f,
-            40.0f));
+            40.0f,
+            10));
         gSpotLights.push_back(new Renderer::SpotLight(
             glm::vec3(1.0f, 1.0f, 1.0f),
-            0.35f,
+            0.0f,
             2.5f,
             glm::vec3(2.0f, 2.0f, 0.0f),
             glm::vec3(0.0f, -1.0f, 0.0f),
             1.0f,
             0.2f,
             0.1f,
-            40.0f));
+            40.0f,
+            11));
 
         gTestModels.push_back(new Renderer::Model());
         gTestModels.push_back(new Renderer::Model());
@@ -346,13 +353,13 @@ bool init()
         gTestModels[0]->AddMesh(
             new Renderer::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true),
             materialBrick);
-        gTestModels[0]->SetPosition(glm::vec3(-1.0f, 2.0f, -2.5f));
+        gTestModels[0]->SetPosition(glm::vec3(-10.0f, 2.0f, -2.5f));
         gTestModels[0]->SetScale(glm::vec3(0.5f));
 
         gTestModels[1]->AddMesh(
             new Renderer::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true),
             materialDirt);
-        gTestModels[1]->SetPosition(glm::vec3(1.0f, 2.0f, -2.5f));
+        gTestModels[1]->SetPosition(glm::vec3(10.0f, 2.0f, -2.5f));
         gTestModels[1]->SetScale(glm::vec3(0.65f));
 
         gTestModels[2]->AddMesh(
@@ -597,6 +604,11 @@ bool loop()
             gBasicShader->SetUniform1f(light + ".constant", gPointLights[i]->GetConstant());
             gBasicShader->SetUniform1f(light + ".linear", gPointLights[i]->GetLinear());
             gBasicShader->SetUniform1f(light + ".exponent", gPointLights[i]->GetExponent());
+
+            gPointLights[i]->GetShadowMap()->GetMap()->Bind();
+
+            std::string shadowMap = "omniShadowMaps[" + std::to_string(i) + "]";
+            gBasicShader->SetUniform1i(shadowMap + ".map", gPointLights[i]->GetShadowMap()->GetMap()->GetUnit());
         }
 
         gBasicShader->SetUniform1i("spotLightCount", gSpotLights.size());
@@ -612,7 +624,14 @@ bool loop()
             gBasicShader->SetUniform1f(light + ".base.exponent", gSpotLights[i]->GetExponent());
             gBasicShader->SetUniform3f(light + ".direction", gSpotLights[i]->GetDirection());
             gBasicShader->SetUniform1f(light + ".edgeCosine", gSpotLights[i]->GetEdgeCosine());
+
+            gSpotLights[i]->GetShadowMap()->GetMap()->Bind();
+
+            std::string shadowMap = "omniShadowMaps[" + std::to_string(gPointLights.size() + i) + "]";
+            gBasicShader->SetUniform1i(shadowMap + ".map", gSpotLights[i]->GetShadowMap()->GetMap()->GetUnit());
         }
+
+        gBasicShader->SetUniform1f("farPlane", Renderer::FAR_PLANE);
 
         DrawModels(gBasicShader, true);
     }

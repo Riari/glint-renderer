@@ -10,12 +10,13 @@ namespace Renderer
         glm::vec3 color,
         float ambientIntensity,
         float diffuseIntensity,
-        glm::vec3 direction)
+        glm::vec3 direction,
+        int shadowMapUnit)
         : Light(
             color,
             ambientIntensity,
             diffuseIntensity,
-            new ShadowMap(SHADOW_MAP_RESOLUTION, GL_TEXTURE_2D, TEXTURE_UNIT_DIRECTIONAL_SHADOWMAP))
+            new ShadowMap(SHADOW_MAP_RESOLUTION, GL_TEXTURE_2D, shadowMapUnit))
         , mDirection(direction)
     {
         mProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 0.1f, 100.0f);

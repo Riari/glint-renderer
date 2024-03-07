@@ -16,7 +16,8 @@ namespace Renderer
             float constant,
             float linear,
             float exponent,
-            float edge);
+            float edge,
+            int shadowMapUnit);
         ~SpotLight() = default;
 
         glm::vec3 GetDirection() const;

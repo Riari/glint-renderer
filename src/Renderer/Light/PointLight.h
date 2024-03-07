@@ -16,7 +16,8 @@ namespace Renderer
             glm::vec3 position,
             float constant,
             float linear,
-            float exponent);
+            float exponent,
+            int shadowMapUnit);
         ~PointLight() = default;
 
         glm::vec3 GetPosition() const;

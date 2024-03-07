@@ -7,6 +7,6 @@ namespace Renderer
     class OmniShadowMap : public ShadowMap
     {
     public:
-        OmniShadowMap(int size);
+        OmniShadowMap(int size, int textureUnit);
     };
 }

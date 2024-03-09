@@ -22,6 +22,12 @@ set(SOURCES
     src/Renderer/Light/Light.cpp
     src/Renderer/Light/PointLight.cpp
     src/Renderer/Light/SpotLight.cpp
+    src/Renderer/Pipeline/Pass/ClearPass.cpp
+    src/Renderer/Pipeline/Pass/ModelPass.cpp
+    src/Renderer/Pipeline/Pass/ScenePass.cpp
+    src/Renderer/Pipeline/Pass/ShadowMapPass.cpp
+    src/Renderer/Pipeline/Pass/SkyboxPass.cpp
+    src/Renderer/Pipeline/Pipeline.cpp
     src/Renderer/Camera.cpp
     src/Renderer/Map.cpp
     src/Renderer/Material.cpp
@@ -55,6 +61,13 @@ set(HEADERS
     src/Renderer/Light/Light.h
     src/Renderer/Light/PointLight.h
     src/Renderer/Light/SpotLight.h
+    src/Renderer/Pipeline/Pass/ClearPass.h
+    src/Renderer/Pipeline/Pass/ModelPass.h
+    src/Renderer/Pipeline/Pass/ScenePass.h
+    src/Renderer/Pipeline/Pass/ShadowMapPass.h
+    src/Renderer/Pipeline/Pass/SkyboxPass.h
+    src/Renderer/Pipeline/IPass.h
+    src/Renderer/Pipeline/Pipeline.h
     src/Renderer/Camera.h
     src/Renderer/Constants.h
     src/Renderer/Map.h

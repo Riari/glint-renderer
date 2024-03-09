@@ -477,6 +477,10 @@ bool loop()
     // TODO: Validate shader inputs (e.g. point light count must not exceed MAX_POINT_LIGHTS)
     // TODO: Encapsulate render passes
 
+    glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float)gWindow->GetWidth() / (float)gWindow->GetHeight(), 0.1f, 100.0f);
+    gCamera->Update(gWindow, static_cast<float>(gDeltaTime));
+    glm::mat4 view = gCamera->GetViewMatrix();
+    glm::mat4 untranslatedView = glm::mat4(glm::mat3(view));
 
     if (gWindow->IsKeyPressed(GLFW_KEY_UP))
     {
@@ -565,15 +569,8 @@ bool loop()
 
     // Render pass: clear for scene
     {
-        glViewport(0, 0, Renderer::VIEWPORT_WIDTH, Renderer::VIEWPORT_HEIGHT);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // ClearPass
     }
-
-    glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float)gWindow->GetWidth() / (float)gWindow->GetHeight(), 0.1f, 100.0f);
-    gCamera->Update(gWindow, static_cast<float>(gDeltaTime));
-    glm::mat4 view = gCamera->GetViewMatrix();
-    glm::mat4 untranslatedView = glm::mat4(glm::mat3(view));
 
     // Render pass: skybox
     {

@@ -1,6 +1,6 @@
 #version 330 core
 
-in vec2 fragTexCoord;
+in vec2 vertexUV;
 out vec4 fragColor;
 
 uniform sampler2D textureSampler;
@@ -8,7 +8,7 @@ uniform sampler2D textureSampler;
 void main()
 {
     // Sample the depth map
-    float depthValue = texture(textureSampler, fragTexCoord).r;
+    float depthValue = texture(textureSampler, vertexUV).r;
 
     // Map depth to color gradient (adjust the near and far values accordingly)
     float near = 0.0; // Near plane distance

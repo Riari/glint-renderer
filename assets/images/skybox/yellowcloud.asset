@@ -1,0 +1,12 @@
+{
+    "Name": "yellowcloud",
+    "Type": "Skybox",
+    "FaceMap": {
+        "Up": "yellowcloud_up",
+        "Down": "yellowcloud_dn",
+        "Left": "yellowcloud_lf",
+        "Right": "yellowcloud_rt",
+        "Back": "yellowcloud_bk",
+        "Front": "yellowcloud_ft"
+    }
+}

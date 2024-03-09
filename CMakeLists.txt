@@ -29,6 +29,7 @@ set(SOURCES
     src/Renderer/Model.cpp
     src/Renderer/OmniShadowMap.cpp
     src/Renderer/ShadowMap.cpp
+    src/Renderer/Skybox.cpp
     src/Util/File.cpp
     src/Util/GL.cpp
     src/main.cpp
@@ -36,8 +37,9 @@ set(SOURCES
 
 set(HEADERS
     src/App/Window.h
-    src/Asset/Type/Model.h
     src/Asset/Type/Image.h
+    src/Asset/Type/Model.h
+    src/Asset/Type/Skybox.h
     src/Asset/Asset.h
     src/Asset/Constants.h
     src/Asset/Manager.h
@@ -61,6 +63,7 @@ set(HEADERS
     src/Renderer/Model.h
     src/Renderer/OmniShadowMap.h
     src/Renderer/ShadowMap.h
+    src/Renderer/Skybox.h
     src/Util/File.h
     src/Util/GL.h
     src/Util/Random.h

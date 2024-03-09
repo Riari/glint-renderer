@@ -15,6 +15,7 @@ namespace Renderer
             int shadowMapUnit);
         ~DirectionalLight() = default;
 
+        void SetDirection(glm::vec3 direction);
         glm::vec3 GetDirection() const;
 
         glm::mat4 CalculateLightTransform() const;

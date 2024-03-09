@@ -16,7 +16,7 @@ namespace Renderer
 
     bool ShadowMap::Init()
     {
-        mMap->Generate(mSize, mSize, GL_DEPTH_COMPONENT, GL_FLOAT, GL_CLAMP_TO_BORDER, false, nullptr);
+        mMap->Generate(mSize, mSize, GL_DEPTH_COMPONENT, GL_FLOAT, GL_CLAMP_TO_BORDER, false, {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr});
         mFBO->Bind();
         mFBO->AttachTexture(*mMap, GL_DEPTH_ATTACHMENT);
         mFBO->SetDrawMode(GL_NONE);

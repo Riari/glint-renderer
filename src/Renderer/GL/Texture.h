@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include <GL/glew.h>
 
 #include "Asset/Type/Image.h"
@@ -24,7 +26,7 @@ namespace Renderer::GL
             GLenum type,
             GLint wrapMode,
             bool withMipmap,
-            const void* data
+            std::vector<void*> data
         ) const;
 
         GLenum GetTarget() const;

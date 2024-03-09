@@ -2,6 +2,6 @@
 
 namespace Asset
 {
-    const char* ASSETS_PATH = "assets/";
-    const char* ASSETS_EXTENSION = ".asset";
+    inline const char* ASSETS_PATH = "assets/";
+    inline const char* ASSETS_EXTENSION = ".asset";
 };

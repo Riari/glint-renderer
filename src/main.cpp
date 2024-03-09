@@ -10,6 +10,7 @@
 #include "App/Window.h"
 #include "Asset/Type/Image.h"
 #include "Asset/Type/Model.h"
+#include "Asset/Type/Skybox.h"
 #include "Asset/Asset.h"
 #include "Asset/Manager.h"
 #include "Renderer/GL/Shader/Program.h"
@@ -23,6 +24,7 @@
 #include "Renderer/Material.h"
 #include "Renderer/Mesh.h"
 #include "Renderer/Model.h"
+#include "Renderer/Skybox.h"
 #include "Util/GL.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -40,48 +42,7 @@ Renderer::GL::Shader::Program* gBasicShader;
 Renderer::GL::Shader::Program* gDirectionalShadowMapShader;
 Renderer::GL::Shader::Program* gOmnidirectionalShadowMapShader;
 Renderer::GL::Shader::Program* gDebugQuadShader;
-
-const int WINDOW_WIDTH{1920};
-const int WINDOW_HEIGHT{1080};
-
-const std::vector<GLfloat> PYRAMID_VERTICES = {
-    // X, Y, Z,             U, V,           NX, NY, NZ
-    -1.0f, -1.0f, -0.6f,    0.0f, 0.0f,     0.0f, 0.0f, 0.0f,
-    0.0f, -1.0f, 1.0f,      0.5f, 0.0f,     0.0f, 0.0f, 0.0f,
-    1.0f, -1.0f, -0.6f,     1.0f, 0.0f,     0.0f, 0.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,       0.5f, 1.0f,     0.0f, 0.0f, 0.0f,
-};
-
-const std::vector<GLuint> PYRAMID_INDICES = {
-    0, 3, 1,
-    1, 3, 2,
-    2, 3, 0,
-    0, 1, 2,
-};
-
-const std::vector<GLfloat> FLOOR_VERTICES = {
-    -10.0f, 0.0f, -10.0f,   0.0f, 0.0f,     0.0f, 1.0f, 0.0f,
-    10.0f, 0.0f, -10.0f,    10.0f, 0.0f,    0.0f, 1.0f, 0.0f,
-    -10.0f, 0.0f, 10.0f,    0.0f, 10.0f,    0.0f, 1.0f, 0.0f,
-    10.0f, 0.0f, 10.0f,     10.0f, 10.0f,   0.0f, 1.0f, 0.0f,
-};
-
-const std::vector<GLuint> FLOOR_INDICES = {
-    0, 2, 1,
-    1, 2, 3,
-};
-
-const std::vector<GLfloat> QUAD_VERTICES = {
-    -1.0f,  1.0f, 0.0f, 0.0f, 1.0f, // Top-left
-     1.0f,  1.0f, 0.0f, 1.0f, 1.0f, // Top-right
-     1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // Bottom-right
-    -1.0f, -1.0f, 0.0f, 0.0f, 0.0f  // Bottom-left
-};
-
-const std::vector<GLuint> QUAD_INDICES = {
-    0, 1, 2,
-    2, 3, 0,
-};
+Renderer::Skybox* gSkybox;
 
 std::vector<Renderer::Model*> gTestModels;
 Renderer::Model* gDebugQuad;
@@ -149,6 +110,7 @@ int main()
     gTestModels.clear();
 
     delete gDebugQuad;
+    delete gSkybox;
 
     glfwTerminate();
 
@@ -172,7 +134,7 @@ bool init()
     }
 
     {
-        gWindow = new App::Window(WINDOW_WIDTH, WINDOW_HEIGHT, "udemy-opengl");
+        gWindow = new App::Window(Renderer::VIEWPORT_WIDTH, Renderer::VIEWPORT_HEIGHT, "udemy-opengl");
         gWindow->MakeCurrent();
     }
 
@@ -189,6 +151,7 @@ bool init()
     // OpenGL flags
     {
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_MULTISAMPLE);
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
 
@@ -250,6 +213,7 @@ bool init()
         Asset::Manager::RegisterInitialiser(".png", Asset::Type::InitialiseImage);
         Asset::Manager::RegisterLoader("Image", Asset::Type::LoadImage);
         Asset::Manager::RegisterLoader("Model", Asset::Type::ModelLoader::Load);
+        Asset::Manager::RegisterLoader("Skybox", Asset::Type::LoadSkybox);
 
         Asset::Manager::Initialise();
         Asset::Manager::LoadAssets();
@@ -265,71 +229,71 @@ bool init()
             0.3f);
 
         gDirectionalLight = new Renderer::DirectionalLight(
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            0.0f,
-            0.0f,
-            glm::vec3(0.0f, -15.0f, -10.0f),
+            glm::vec3(1.0f, 0.6f, 0.4f),
+            0.2f,
+            1.5f,
+            glm::vec3(0.0f, -25.0f, -10.0f),
             5);
 
-        gPointLights.push_back(new Renderer::PointLight(
-            glm::vec3(1.0f, 0.0f, 0.5f),
-            0.1f,
-            2.0f,
-            glm::vec3(0.0f, 2.5f, -3.0f),
-            0.3f,
-            0.1f,
-            0.1f,
-            6));
-        gPointLights.push_back(new Renderer::PointLight(
-            glm::vec3(0.0f, 0.75f, 1.0f),
-            0.1f,
-            2.0f,
-            glm::vec3(3.0f, 2.5f, 0.0f),
-            0.3f,
-            0.1f,
-            0.1f,
-            7));
-        gPointLights.push_back(new Renderer::PointLight(
-            glm::vec3(1.0f, 0.42f, 0.0f),
-            0.1f,
-            2.0f,
-            glm::vec3(-3.0f, 2.5f, 0.0f),
-            0.3f,
-            0.1f,
-            0.1f,
-            8));
-        gPointLights.push_back(new Renderer::PointLight(
-            glm::vec3(0.47f, 0.0f, 1.0f),
-            0.1f,
-            2.0f,
-            glm::vec3(0.0f, 2.5f, 3.0f),
-            0.3f,
-            0.1f,
-            0.1f,
-            9));
+        // gPointLights.push_back(new Renderer::PointLight(
+        //     glm::vec3(1.0f, 0.0f, 0.5f),
+        //     0.1f,
+        //     2.0f,
+        //     glm::vec3(0.0f, 2.5f, -3.0f),
+        //     0.3f,
+        //     0.1f,
+        //     0.1f,
+        //     6));
+        // gPointLights.push_back(new Renderer::PointLight(
+        //     glm::vec3(0.0f, 0.75f, 1.0f),
+        //     0.1f,
+        //     2.0f,
+        //     glm::vec3(3.0f, 2.5f, 0.0f),
+        //     0.3f,
+        //     0.1f,
+        //     0.1f,
+        //     7));
+        // gPointLights.push_back(new Renderer::PointLight(
+        //     glm::vec3(1.0f, 0.42f, 0.0f),
+        //     0.1f,
+        //     2.0f,
+        //     glm::vec3(-3.0f, 2.5f, 0.0f),
+        //     0.3f,
+        //     0.1f,
+        //     0.1f,
+        //     8));
+        // gPointLights.push_back(new Renderer::PointLight(
+        //     glm::vec3(0.47f, 0.0f, 1.0f),
+        //     0.1f,
+        //     2.0f,
+        //     glm::vec3(0.0f, 2.5f, 3.0f),
+        //     0.3f,
+        //     0.1f,
+        //     0.1f,
+        //     9));
 
-        gSpotLights.push_back(new Renderer::SpotLight(
-            glm::vec3(1.0f, 1.0f, 1.0f),
-            0.0f,
-            2.5f,
-            glm::vec3(-2.0f, 2.0f, 0.0f),
-            glm::vec3(0.0f, -1.0f, 0.0f),
-            1.0f,
-            0.2f,
-            0.1f,
-            40.0f,
-            10));
-        gSpotLights.push_back(new Renderer::SpotLight(
-            glm::vec3(1.0f, 1.0f, 1.0f),
-            0.0f,
-            2.5f,
-            glm::vec3(2.0f, 2.0f, 0.0f),
-            glm::vec3(0.0f, -1.0f, 0.0f),
-            1.0f,
-            0.2f,
-            0.1f,
-            40.0f,
-            11));
+        // gSpotLights.push_back(new Renderer::SpotLight(
+        //     glm::vec3(1.0f, 1.0f, 1.0f),
+        //     0.0f,
+        //     2.5f,
+        //     glm::vec3(-2.0f, 2.0f, 0.0f),
+        //     glm::vec3(0.0f, -1.0f, 0.0f),
+        //     1.0f,
+        //     0.2f,
+        //     0.1f,
+        //     40.0f,
+        //     10));
+        // gSpotLights.push_back(new Renderer::SpotLight(
+        //     glm::vec3(1.0f, 1.0f, 1.0f),
+        //     0.0f,
+        //     2.5f,
+        //     glm::vec3(2.0f, 2.0f, 0.0f),
+        //     glm::vec3(0.0f, -1.0f, 0.0f),
+        //     1.0f,
+        //     0.2f,
+        //     0.1f,
+        //     40.0f,
+        //     11));
 
         gTestModels.push_back(new Renderer::Model());
         gTestModels.push_back(new Renderer::Model());
@@ -351,21 +315,9 @@ bool init()
         materialStainlessSteel->SetMap(new Renderer::Map(glm::vec3(1.0f, 1.0f, 1.0f), Asset::Type::MapTargetType::SPECULAR));
 
         gTestModels[0]->AddMesh(
-            new Renderer::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true),
-            materialBrick);
-        gTestModels[0]->SetPosition(glm::vec3(-10.0f, 2.0f, -2.5f));
-        gTestModels[0]->SetScale(glm::vec3(0.5f));
-
-        gTestModels[1]->AddMesh(
-            new Renderer::Mesh(PYRAMID_VERTICES, PYRAMID_INDICES, 8, { 3, 2, 3 }, true),
-            materialDirt);
-        gTestModels[1]->SetPosition(glm::vec3(10.0f, 2.0f, -2.5f));
-        gTestModels[1]->SetScale(glm::vec3(0.65f));
-
-        gTestModels[2]->AddMesh(
-            new Renderer::Mesh(FLOOR_VERTICES, FLOOR_INDICES, 8, { 3, 2, 3 }, false),
+            new Renderer::Mesh(Renderer::PRIMITIVE_PLANE_VERTICES, Renderer::PRIMITIVE_PLANE_INDICES, 8, { 3, 2, 3 }, false),
             materialStainlessSteel);
-        gTestModels[2]->SetPosition(glm::vec3(0.0f, -2.0f, 0.0f));
+        gTestModels[0]->SetPosition(glm::vec3(0.0f, -2.0f, 0.0f));
 
         // TODO: Define a better way of converting imported models and materials into renderer-ready models
         const Asset::Type::Model& model = Asset::Manager::Get<Asset::Type::Model>("Model::F1Car");
@@ -390,25 +342,27 @@ bool init()
                 }
             }
 
-            gTestModels[3]->AddMaterial(material);
+            gTestModels[1]->AddMaterial(material);
         }
 
         for (size_t i = 0; i < model.mMeshes.size(); ++i)
         {
             Asset::Type::MeshData* mesh = model.mMeshes[i];
 
-            gTestModels[3]->AddMesh(
+            gTestModels[1]->AddMesh(
                 new Renderer::Mesh(mesh->mVertices, mesh->mIndices, mesh->mVertexLength, mesh->mVertexLayout, false),
                 mesh->mMaterialIndex);
         }
 
-        gTestModels[3]->SetPosition(glm::vec3(0.0f, -1.0f, 0.0f));
-        gTestModels[3]->SetScale(glm::vec3(0.01f));
+        gTestModels[1]->SetPosition(glm::vec3(0.0f, -2.0f, 0.0f));
+        gTestModels[1]->SetScale(glm::vec3(0.01f));
+
+        gSkybox = new Renderer::Skybox("Skybox::yellowcloud");
     }
 
     gDebugQuad = new Renderer::Model();
     gDebugQuad->AddMesh(
-        new Renderer::Mesh(QUAD_VERTICES, QUAD_INDICES, 5, { 3, 2 }, false),
+        new Renderer::Mesh(Renderer::PRIMITIVE_QUAD_VERTICES, Renderer::PRIMITIVE_QUAD_INDICES, 5, { 3, 2 }, false),
         new Renderer::Material(0.0f, 0.0f));
 
     spdlog::info("Initialisation complete!");
@@ -519,13 +473,52 @@ bool loop()
 
     glfwPollEvents();
 
-    glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float)gWindow->GetWidth() / (float)gWindow->GetHeight(), 0.1f, 100.0f);
-    gCamera->Update(gWindow, static_cast<float>(gDeltaTime));
-
     // TODO: Come up with a better way of managing the interface between world objects (e.g. lights) and shader programs
     // TODO: Validate shader inputs (e.g. point light count must not exceed MAX_POINT_LIGHTS)
     // TODO: Encapsulate render passes
 
+
+    if (gWindow->IsKeyPressed(GLFW_KEY_UP))
+    {
+        glm::vec3 direction = gDirectionalLight->GetDirection();
+        direction.y += 0.1f;
+        gDirectionalLight->SetDirection(direction);
+    }
+
+    if (gWindow->IsKeyPressed(GLFW_KEY_DOWN))
+    {
+        glm::vec3 direction = gDirectionalLight->GetDirection();
+        direction.y -= 0.1f;
+        gDirectionalLight->SetDirection(direction);
+    }
+
+    if (gWindow->IsKeyPressed(GLFW_KEY_LEFT))
+    {
+        glm::vec3 direction = gDirectionalLight->GetDirection();
+        direction.x -= 0.1f;
+        gDirectionalLight->SetDirection(direction);
+    }
+
+    if (gWindow->IsKeyPressed(GLFW_KEY_RIGHT))
+    {
+        glm::vec3 direction = gDirectionalLight->GetDirection();
+        direction.x += 0.1f;
+        gDirectionalLight->SetDirection(direction);
+    }
+
+    if (gWindow->IsKeyPressed(GLFW_KEY_O))
+    {
+        glm::vec3 direction = gDirectionalLight->GetDirection();
+        direction.z += 0.1f;
+        gDirectionalLight->SetDirection(direction);
+    }
+
+    if (gWindow->IsKeyPressed(GLFW_KEY_L))
+    {
+        glm::vec3 direction = gDirectionalLight->GetDirection();
+        direction.z -= 0.1f;
+        gDirectionalLight->SetDirection(direction);
+    }
 
     // Render pass: directional shadow maps
     {
@@ -570,15 +563,27 @@ bool loop()
         }
     }
 
+    // Render pass: clear for scene
+    {
+        glViewport(0, 0, Renderer::VIEWPORT_WIDTH, Renderer::VIEWPORT_HEIGHT);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float)gWindow->GetWidth() / (float)gWindow->GetHeight(), 0.1f, 100.0f);
+    gCamera->Update(gWindow, static_cast<float>(gDeltaTime));
+    glm::mat4 view = gCamera->GetViewMatrix();
+    glm::mat4 untranslatedView = glm::mat4(glm::mat3(view));
+
+    // Render pass: skybox
+    {
+        gSkybox->Draw(projection, untranslatedView);
+    }
+
     // Render pass: scene
     {
         gBasicShader->Use();
 
-        glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glm::mat4 view = gCamera->GetViewMatrix();
         gBasicShader->SetUniformMatrix4fv("view", glm::value_ptr(view));
         gBasicShader->SetUniformMatrix4fv("projection", glm::value_ptr(projection));
         gBasicShader->SetUniform3f("directionalLight.base.colour", gDirectionalLight->GetColour());

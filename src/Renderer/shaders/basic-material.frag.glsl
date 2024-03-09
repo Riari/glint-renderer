@@ -98,7 +98,7 @@ float CalcDirectionalShadowFactor(DirectionalLight light)
     vec3 normal = -normalize(vertexNormal);
     vec3 lightDirection = normalize(directionalLight.direction);
 
-    float bias = max(0.05 * (1.0 - dot(normal, lightDirection)), 0.0005);
+    float bias = max(0.010 * (1.0 - dot(normal, lightDirection)), 0.0003);
 
     float shadow = 0.0;
     vec2 texelSize = 1.0 / textureSize(directionalShadowMap, 0);
@@ -122,9 +122,9 @@ float CalcOmnidirectionalShadowFactor(PointLight light, int shadowMapIndex)
     float currentDepth = length(fragToLight);
 
     float shadow = 0.0;
-    float bias = 0.05;
+    float bias = 0.01;
     float viewDistance = length(eyePosition - vertexFragPosition);
-    float diskRadius = (1.0 + (viewDistance / farPlane)) / 50.0;
+    float diskRadius = (1.0 + (viewDistance / farPlane)) / 25.0;
 
     for (int i = 0; i < GRID_SAMPLES; ++i)
     {

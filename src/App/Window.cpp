@@ -17,6 +17,7 @@ namespace App
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+        glfwWindowHint(GLFW_SAMPLES, 4);
 
         spdlog::info("Creating window {} x {} with OpenGL {}.{} context", width, height, GL_VERSION_MAJOR, GL_VERSION_MINOR);
 

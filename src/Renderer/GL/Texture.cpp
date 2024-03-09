@@ -46,12 +46,12 @@ void Texture::Generate(
     GLenum type,
     GLint wrapMode,
     bool withMipmap,
-    const void* data) const
+    std::vector<void*> data) const
 {
     switch (mTarget)
     {
         case GL_TEXTURE_2D:
-            glTexImage2D(mTarget, 0, format, width, height, 0, format, type, data);
+            glTexImage2D(mTarget, 0, format, width, height, 0, format, type, data[0]);
             glTexParameteri(mTarget, GL_TEXTURE_WRAP_S, wrapMode);
             glTexParameteri(mTarget, GL_TEXTURE_WRAP_T, wrapMode);
             glTexParameteri(mTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -60,7 +60,7 @@ void Texture::Generate(
         case GL_TEXTURE_CUBE_MAP:
             for (size_t i = 0; i < 6; ++i)
             {
-                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, type, data);
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, type, data[i]);
             }
 
             glTexParameteri(mTarget, GL_TEXTURE_WRAP_R, wrapMode);
@@ -96,5 +96,5 @@ int Texture::GetUnit() const
 
 void Texture::GenerateFromImage(const Asset::Type::Image& image) const
 {
-    Generate(image.width, image.height, image.channels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, GL_REPEAT, true, image.data);
+    Generate(image.width, image.height, image.channels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, GL_REPEAT, true, {image.data});
 }

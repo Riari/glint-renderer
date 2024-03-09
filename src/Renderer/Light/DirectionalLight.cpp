@@ -22,6 +22,11 @@ namespace Renderer
         mProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 0.1f, 100.0f);
     }
 
+    void DirectionalLight::SetDirection(glm::vec3 direction)
+    {
+        mDirection = direction;
+    }
+
     glm::vec3 DirectionalLight::GetDirection() const
     {
         return mDirection;

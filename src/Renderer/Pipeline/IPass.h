@@ -2,12 +2,17 @@
 
 namespace Renderer
 {
+    class Context;
+    class Scene;
+
     class IPass
     {
     public:
-        virtual ~IPass() = 0;
+        virtual bool Init() const
+        {
+            return true;
+        }
 
-        // TODO: This should probably take in a renderer context so it can access things like camera matrices
-        virtual void Execute() = 0;
+        virtual void Execute(const Context* context, const Scene* scene) = 0;
     };
 };

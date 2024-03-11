@@ -10,6 +10,6 @@ namespace Renderer
         ClearPass() = default;
         ~ClearPass() = default;
 
-        void Execute() override;
+        void Execute(const Context* context, const Scene* scene) override;
     };
 };

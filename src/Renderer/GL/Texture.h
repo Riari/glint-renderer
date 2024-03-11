@@ -2,8 +2,6 @@
 
 #include <vector>
 
-#include <GL/glew.h>
-
 #include "Asset/Type/Image.h"
 #include "Object.h"
 

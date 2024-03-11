@@ -23,17 +23,19 @@ set(SOURCES
     src/Renderer/Light/PointLight.cpp
     src/Renderer/Light/SpotLight.cpp
     src/Renderer/Pipeline/Pass/ClearPass.cpp
-    src/Renderer/Pipeline/Pass/ModelPass.cpp
+    src/Renderer/Pipeline/Pass/DebugDirectionalShadowMapPass.cpp
     src/Renderer/Pipeline/Pass/ScenePass.cpp
     src/Renderer/Pipeline/Pass/ShadowMapPass.cpp
     src/Renderer/Pipeline/Pass/SkyboxPass.cpp
     src/Renderer/Pipeline/Pipeline.cpp
     src/Renderer/Camera.cpp
+    src/Renderer/Context.cpp
     src/Renderer/Map.cpp
     src/Renderer/Material.cpp
     src/Renderer/Mesh.cpp
     src/Renderer/Model.cpp
     src/Renderer/OmniShadowMap.cpp
+    src/Renderer/Scene.cpp
     src/Renderer/ShadowMap.cpp
     src/Renderer/Skybox.cpp
     src/Util/File.cpp
@@ -62,7 +64,7 @@ set(HEADERS
     src/Renderer/Light/PointLight.h
     src/Renderer/Light/SpotLight.h
     src/Renderer/Pipeline/Pass/ClearPass.h
-    src/Renderer/Pipeline/Pass/ModelPass.h
+    src/Renderer/Pipeline/Pass/DebugDirectionalShadowMapPass.h
     src/Renderer/Pipeline/Pass/ScenePass.h
     src/Renderer/Pipeline/Pass/ShadowMapPass.h
     src/Renderer/Pipeline/Pass/SkyboxPass.h
@@ -70,11 +72,13 @@ set(HEADERS
     src/Renderer/Pipeline/Pipeline.h
     src/Renderer/Camera.h
     src/Renderer/Constants.h
+    src/Renderer/Context.h
     src/Renderer/Map.h
     src/Renderer/Material.h
     src/Renderer/Mesh.h
     src/Renderer/Model.h
     src/Renderer/OmniShadowMap.h
+    src/Renderer/Scene.h
     src/Renderer/ShadowMap.h
     src/Renderer/Skybox.h
     src/Util/File.h

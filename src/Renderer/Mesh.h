@@ -2,8 +2,6 @@
 
 #include <vector>
 
-#include <GL/glew.h>
-
 #include "Renderer/GL/Buffer/EBO.h"
 #include "Renderer/GL/Buffer/VAO.h"
 #include "Renderer/GL/Buffer/VBO.h"

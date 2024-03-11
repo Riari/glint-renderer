@@ -1,7 +1,5 @@
 #pragma once
 
-#include <GL/glew.h>
-
 #include "Renderer/GL/Object.h"
 
 namespace Renderer::GL

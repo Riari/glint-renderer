@@ -11,16 +11,29 @@ namespace Renderer
         mPasses.clear();
     }
 
+    bool Pipeline::Init()
+    {
+        for (auto pass : mPasses)
+        {
+            if (!pass->Init())
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     void Pipeline::AddPass(IPass* pass)
     {
         mPasses.push_back(pass);
     }
 
-    void Pipeline::Execute()
+    void Pipeline::Execute(const Context* context, const Scene* scene)
     {
         for (auto pass : mPasses)
         {
-            pass->Execute();
+            pass->Execute(context, scene);
         }
     }
 };

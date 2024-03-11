@@ -16,6 +16,7 @@ namespace Renderer
         void Update(App::Window* pWindow, float deltaTime);
 
         glm::mat4 GetViewMatrix() const;
+        glm::mat4 GetViewMatrixWithoutTranslation() const;
         glm::vec3 GetPosition() const;
 
     private:

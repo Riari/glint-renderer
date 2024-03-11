@@ -24,6 +24,11 @@ namespace Renderer
         return glm::lookAt(mPosition, mPosition + mFront, mUp);
     }
 
+    glm::mat4 Camera::GetViewMatrixWithoutTranslation() const
+    {
+        return glm::mat4(glm::mat3(GetViewMatrix()));
+    }
+
     glm::vec3 Camera::GetPosition() const
     {
         return mPosition;

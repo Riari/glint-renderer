@@ -2,6 +2,9 @@
 
 #include <vector>
 
+#include "Renderer/Context.h"
+#include "Renderer/Scene.h"
+
 #include "IPass.h"
 
 namespace Renderer
@@ -12,8 +15,9 @@ namespace Renderer
         Pipeline() = default;
         ~Pipeline();
 
+        bool Init();
         void AddPass(IPass* pass);
-        void Execute();
+        void Execute(const Context* context, const Scene* scene);
 
     private:
         std::vector<IPass*> mPasses;

@@ -2,8 +2,7 @@
 
 #include <vector>
 
-#include <GL/glew.h>
-#include <glm/mat4x4.hpp>
+#include <glm/glm.hpp>
 
 #include "Renderer/GL/Buffer/EBO.h"
 #include "Renderer/GL/Buffer/VAO.h"

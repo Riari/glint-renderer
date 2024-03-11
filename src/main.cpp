@@ -109,7 +109,7 @@ bool init()
     }
 
     {
-        gWindow = new App::Window(Renderer::VIEWPORT_WIDTH, Renderer::VIEWPORT_HEIGHT, "udemy-opengl");
+        gWindow = new App::Window(Renderer::VIEWPORT_WIDTH, Renderer::VIEWPORT_HEIGHT, "Glint");
         gWindow->MakeCurrent();
     }
 

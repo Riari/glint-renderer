@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.27)
-project(udemy-opengl LANGUAGES CXX)
+project(glint LANGUAGES CXX)
 
 find_package(assimp)
 find_package(glew)
